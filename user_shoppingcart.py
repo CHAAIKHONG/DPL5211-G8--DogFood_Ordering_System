@@ -31,12 +31,12 @@ def view_cart(cart, user_id):
         print("🛒 The cart is empty or the User ID does not exist.")
     else:
         print(f"\nShopping cart for user {user_id}:")
-        print(f"{'Product':<35} {'|Quantity':<12} {'|Unit Price':<14} {'|Total':<14}")
+        print(f"\n{'Product':<35} {'|Quantity':<12} {'|Unit Price':<14} {'|Total':<14}")
         print("====================================+============+==============+==============")
         for item in user_cart:
             print(f"{item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<11.2f}")
         total = sum(item['total_price'] for item in user_cart)
-        print(f"Total Amount: ${total:.2f}")
+        print(f"\nTotal Amount: ${total:.2f}")
 
 
 def delete_cart(cart, user_id):
@@ -47,7 +47,7 @@ def delete_cart(cart, user_id):
 
     print(f"\nShopping cart for user {user_id}:")
     for idx, item in enumerate(user_cart, 1):
-        print(f"{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<14} {'|Total Price':<14}")
+        print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<14} {'|Total Price':<14}")
         print("=====+=====================================+============+==============+==============")
     for idx, item in enumerate(user_cart, 1):
         print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<11.2f}")
