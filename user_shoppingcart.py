@@ -46,9 +46,8 @@ def delete_cart(cart, user_id):
         return cart
 
     print(f"\nShopping cart for user {user_id}:")
-    for idx, item in enumerate(user_cart, 1):
-        print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<14} {'|Total Price':<14}")
-        print("=====+=====================================+============+==============+==============")
+    print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<14} {'|Total Price':<14}")
+    print("=====+=====================================+============+==============+==============")
     for idx, item in enumerate(user_cart, 1):
         print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<11.2f}")
 
