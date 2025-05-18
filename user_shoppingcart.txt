@@ -1,6 +1,1 @@
-1,Acana Puppy Small Breed,2,45.99,91.98
-123,Orijen Original Dry Dog Food,2,55.00,110.00
-123,Open Farm Freeze-Dried Raw,2,48.00,96.00
-1,Acana Puppy Small Breed,20,45.99,919.80
-1,Cesar Wet Dog Food Beef,1,2.50,2.50
-1,Cesar Wet Dog Food Beef,1,2.50,2.501,Orijen Original Dry Dog Food,15,55.00,825.00
+123,Orijen Original Dry Dog Food,2,55.0,110.0
