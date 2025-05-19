@@ -39,7 +39,7 @@ def login(users):
         print("🔐 LOGIN")
         email = input("📧 Email: ").strip()
         password = input("🔑 Password: ").strip()
-        if email in users and users[email]["password_hash"] == hash_password(password):
+        if email in users and users[email]["password_hash"] == hashlib.sha256(password.encode()).hexdigest():
             print(f"\n✅ Welcome, {users[email]['username']}!")
             return users[email]
         else:
