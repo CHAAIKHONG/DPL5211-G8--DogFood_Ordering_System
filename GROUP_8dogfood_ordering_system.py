@@ -108,16 +108,18 @@ def save_users(users, filename="users_details.txt"):
             f.write(f"{user['id']},{user['fullname']},{user['email']},{user['password_hash']}\n")
 
 def register():
+    clear_screen()
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("                       Register                         ")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    checkpass = False
-    while not checkpass:
-        fullname = str(input("Enter your fullname : "))
-        email = str(input("Enter your email    : "))
-        password = str(input("Enter your password : "))
-        confirmpass = str(input("Enter confirm your password : "))
+    
+    fullname = str(input("Enter username         : "))
+    email = str(input("Enter your email       : "))
 
+    while True:
+        password = str(input("Enter password         : "))
+        confirmpass = str(input("Enter confirm password : "))
+        
         if password == confirmpass:
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
             users = load_user_details("register")
@@ -126,17 +128,18 @@ def register():
             with open("users_details.txt", "a") as f:
                 f.write(f"{next_id},{fullname},{email},{hashed_password}\n")
 
-            print("Password confirmed! Registration successful.")
+            print("\nPassword confirmed! Registration successful.")
             input("Press Enter to continue...")
-            checkpass = True
+            break
         else:
-            print("Passwords do not match. Please try again.\n")
+            print("Passwords do not match. Please enter the password again.\n")
 
 def login():
     global user_id
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print("                           Login                        ")
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    clear_screen()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                          Login                          ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     verify = False
 
     while not verify:
@@ -147,14 +150,29 @@ def login():
 
         for user in users:
             if email == user['email'] and hidden_password == user['password']:
-                print(f"Welcome, {user['fullname']}")
+                clear_screen()
+                print("╔" + "═" * 50 + "╗")
+                print("║" + " " * 50 + "║")
+                
+                welcome_msg = f"Welcome, {user['fullname']}!"
+                centered_msg = welcome_msg.center(50)
+                print(f"║{centered_msg}║")
+                
+                print("║" + " " * 50 + "║")
+                print("╚" + "═" * 50 + "╝")
+                input("\nPress Enter to continue...")
+                clear_screen()
                 user_id = user['id']
                 verify = True
                 menu()
                 break
 
         if not verify:
-            print("Invalid email or password. Please try again.")
+            input("Invalid email or password. Please try again.")
+            clear_screen()
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("                          Login                          ")
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
 def save_products(products, filename):
     with open(filename, 'w', encoding='utf-8') as file:
@@ -163,37 +181,38 @@ def save_products(products, filename):
             file.write(line)
 
 def show_categories(categories):
-    print("Category List:")
-    print("-" * 30)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                        Category                        ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     for category_id, category_name in categories.items():
         print(f"{category_id}. {category_name}")
-    print("0. Exit")
+    print("\n0. Go Back Menu")
 
 def show_products_by_category(products, category_id, category_name):
     clear_screen()
     print(f"Products in Category {category_name}:")
-    print("-" * 30)
+    print("~" * 40)
     found = False
     for product in products:
         if product['category_id'] == category_id:
             print(f"{product['product_id']}. {product['product_name']} - ${product['price']}")
             found = True
     if not found:
-        print("No products found in this category.")
+        print("\033[91mNo products found in this category.\033[0m")
     print("\n0. Back")
 
 def show_product_detail(product):
     clear_screen()
-    print(f"Product ID: {product['product_id']}")
-    print(f"Name: {product['product_name']}")
-    print(f"Price: ${product['price']}")
-    print(f"Stock: {product['stock']}")
-    print(f"Details: {product['details']}")
+    print(f"Product ID  : {product['product_id']}")
+    print(f"Name        : {product['product_name']}")
+    print(f"Price       : ${product['price']}")
+    print(f"Stock       : {product['stock']}")
+    print(f"Details     : {product['details']}")
     print("\n0. Back")
     if int(product['stock']) > 0:
         print("1. Add to cart")
     else:
-        print("❌ Out of stock - Cannot add to cart")
+        print("\033[91mOut of stock - Cannot add to cart\033[0m")
 
 def add_to_cart(user_id, product, products, product_file):
     if int(product['stock']) == 0:
@@ -208,7 +227,7 @@ def add_to_cart(user_id, product, products, product_file):
                 print("Please enter a valid quantity greater than 0.")
                 continue
             elif quantity > int(product['stock']):
-                print("Quantity exceeds stock. Please enter a smaller number.")
+                print("\033[91mQuantity exceeds stock. Please enter a smaller number.\033[0m")
                 continue
             break
         except ValueError:
@@ -221,7 +240,7 @@ def add_to_cart(user_id, product, products, product_file):
     # 更新库存
     product['stock'] = str(int(product['stock']) - quantity)
     save_products(products, product_file)
-    print("✅ Product added to cart!")
+    print("\033[96mProduct added to cart!\033[0m")
     input("Press Enter to continue...")
 
 def load_cart(filename="user_shoppingcart.txt"):
@@ -417,9 +436,9 @@ def category():
         clear_screen()
         show_categories(categories)
         
-        selected_category = input("\nEnter a category ID to view its products (or 0 to exit): ").strip()
+        selected_category = input("\nEnter a category ID to view its products : ").strip()
         if selected_category == "0":
-            print("Goodbye!")
+            clear_screen()
             break
         elif selected_category in categories:
             while True:
@@ -438,19 +457,15 @@ def category():
                             if int(product['stock']) > 0:
                                 add_to_cart(user_id, product, products, product_file)
                             else:
-                                print("❌ This product is out of stock. Cannot add to cart.")
-                                input("Press Enter to continue...")
+                                input("This product is out of stock. Cannot add to cart.")
                             break
                         else:
-                            print("❌ Invalid code. Please try again.")
-                            input("Press Enter to continue...")
+                            input("Invalid code. Please press Enter to try again.")
                     break  # Exit product detail loop
                 else:
-                    print("❌ Invalid product ID. Please try again.")
-                    input("Press Enter to continue...")
+                    input("Invalid product ID. Please press Enter to try again.")
         else:
-            print("❌ Invalid category ID. Please try again.")
-            input("Press Enter to continue...")
+            input("Invalid category ID. Please press Enter to try again.")
 
 def shoppingcart():
     cart = load_cart()
@@ -581,15 +596,18 @@ def menu():
                 break
             case _:
                 print("Invalid input. Please choose between 0-5.")
+                input("\nPress Enter to return to the menu...")
+                clear_screen()
 
 while True:
+    clear_screen()
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("                Welcome to Dog Food Shop                ")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("1. Login")
     print("2. Register")
     print("0. Exit")
-    first_choose = int(input("You want to login our system or register new account. Please enter the number : "))
+    first_choose = int(input("Please Enter your choice : "))
 
     if first_choose == 1:
         login()
@@ -600,5 +618,5 @@ while True:
     elif first_choose == 0:
         exit()
     else:
+        input("\nInput Wrong.Please press Enter to try again")
         clear_screen()
-        print("Input Wrong. Numbers are 1 or 2 only. Please choose one time : ")
