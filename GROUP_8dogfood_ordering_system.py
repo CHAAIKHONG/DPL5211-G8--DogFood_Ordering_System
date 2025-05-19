@@ -386,7 +386,7 @@ def update_profile(user, users):
                 new_pass = input("Enter new password: ").strip()
                 confirm_pass = input("Confirm password: ").strip()
                 if new_pass and new_pass == confirm_pass:
-                    user["password_hash"] = hash_password(new_pass)
+                    user["password_hash"] = hashlib.sha256(new_pass.encode()).hexdigest()
                     print("✅ Password updated.")
                     break
                 else:
