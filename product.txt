@@ -1,10 +1,10 @@
 1,1,Acana Puppy Small Breed,45.99,0,High quality puppy dry food
 2,1,Orijen Original Dry Dog Food,55.00,0,Premium dry dog food with fresh ingredients
-1,2,Cesar Wet Dog Food Beef,2.50,48,Delicious wet food with real beef
+1,2,Cesar Wet Dog Food Beef,2.50,14,Delicious wet food with real beef
 2,2,Pedigree Wet Food Chicken,2.30,0,Tasty wet food with chicken flavor
-1,3,Primal Raw Frozen Chicken Nuggets,35.00,10,Raw frozen chicken nuggets for dogs
+1,3,Primal Raw Frozen Chicken Nuggets,35.00,0,Raw frozen chicken nuggets for dogs
 2,3,Stella & Chewy's Raw Patties,40.00,12,Raw frozen patties rich in nutrients
-1,4,Instinct Freeze-Dried Raw Meals,50.00,1,Freeze-dried raw meals for dogs
+1,4,Instinct Freeze-Dried Raw Meals,50.00,0,Freeze-dried raw meals for dogs
 2,4,Open Farm Freeze-Dried Raw,48.00,25,Natural freeze-dried raw dog food
-1,5,Homemade Chicken & Rice Bowl,15.00,30,Homemade style chicken and rice
+1,5,Homemade Chicken & Rice Bowl,15.00,7,Homemade style chicken and rice
 2,5,Beef & Sweet Potato Stew,16.00,22,Hearty beef stew with sweet potato

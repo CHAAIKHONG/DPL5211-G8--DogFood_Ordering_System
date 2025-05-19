@@ -29,7 +29,7 @@ def register():
         fullname = str(input("Enter your fullname : "))
         email = str(input("Enter your email    : "))
         password = str(input("Enter your password : "))
-        confirmpass = str(input("Enter confirm your passwrd : "))
+        confirmpass = str(input("Enter confirm your password : "))
 
         if password == confirmpass:
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
