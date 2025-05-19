@@ -1,4 +1,5 @@
 import os
+from datetime import datetime 
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
@@ -51,10 +52,13 @@ def view_and_purchase(cart, user_id):
             print("❌ No valid items selected.")
             return cart
 
+        # 获取当前下单时间
+        order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         # Save selected items to order history
         with open("orderhistory.txt", 'a', encoding='utf-8') as f:
             for item in selected_items:
-                f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']}\n")
+                f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']},{order_datetime}\n")
 
         # Remove selected items from cart
         for item in selected_items:
