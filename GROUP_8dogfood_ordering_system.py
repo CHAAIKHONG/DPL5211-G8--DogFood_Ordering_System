@@ -266,95 +266,114 @@ def save_cart(cart, filename="user_shoppingcart.txt"):
             f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']}\n")
 
 def view_and_purchase(cart, user_id):
-    user_cart = [item for item in cart if item['user_id'] == str(user_id)]
+    while True:
+        user_cart = [item for item in cart if item['user_id'] == str(user_id)]
 
-    if not user_cart:
-        print("🛒 The cart is empty or the User ID does not exist.")
-        return cart
+        if not user_cart:
+            print("\033[91mThe cart is empty.\033[0m")
+            input("Press Enter to contiue...")
+            return cart
+        clear_screen()
+        print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<13} {'|Unit Price':<14} {'|Total':<10}")
+        print("=====+=====================================+=============+==============+==============")
+        for idx, item in enumerate(user_cart, 1):
+            print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<11} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
 
-    print(f"\n🛍️ Shopping cart for user {user_id}:")
-    print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<13} {'|Unit Price':<14} {'|Total':<10}")
-    print("=====+=====================================+=============+==============+==============")
-    for idx, item in enumerate(user_cart, 1):
-        print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<11} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
-
-    try:
-        print("\n0/Go back main menu")
+        print("\n0. Go back to main menu")
         choice = input("\nEnter the numbers of items to purchase (e.g. 1,2 or -1 for all): ").strip()
+
         if choice == '0':
             return cart
         elif choice == '-1':
             selected_items = user_cart
+            break
         else:
-            indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
-            selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
-
-        if not selected_items:
-            print("❌ No valid items selected.")
-            return cart
-
-        # 获取当前下单时间
-        order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # Save selected items to order history
+            try:
+                indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
+                selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
+                if not selected_items:
+                    print("\033[91mInvalid selection. Please enter valid item numbers.\033[0m")
+                    input("Press Enter to try again...")
+                    continue
+                break
+            except Exception:
+                print("\033[91mInvalid input format. Please try again.\033[0m")
+                input("Press Enter to try again...")
+                continue
+    order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    try:
         with open("orderhistory.txt", 'a', encoding='utf-8') as f:
             for item in selected_items:
                 f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']},{order_datetime}\n")
-
-        # Remove selected items from cart
         for item in selected_items:
             cart.remove(item)
-
-        print("✅ Purchase completed and saved to orderhistory.txt")
+        print("\033[96mPurchase completed.\033[0m")
+        input("Press Enter to contiue...")
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"\033[91mError: {e}\033[0m")
+
     return cart
 
 def delete_items(cart, user_id):
-    user_cart = [item for item in cart if item['user_id'] == user_id]
-    if not user_cart:
-        print("🛒 The cart is empty or the User ID does not exist.")
-        return cart
+    while True:
+        user_cart = [item for item in cart if item['user_id'] == str(user_id)]
 
-    print(f"\n🗑️ Delete items from cart for user {user_id}:")
-    print(f"{'No':<4} {'|Product':<35} {'|Quantity':<10} {'|Unit Price':<13} {'|Total':<10}")
-    print("=====+===================================+============+===============+==============")
-    for idx, item in enumerate(user_cart, 1):
-        print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
-
-    try:
-        choice = input("\nEnter the numbers of items to delete (e.g. 1,2) or 0 to go back menu: ").strip()
-        if choice == '0':
-            print("❌ Deletion cancelled.")
+        if not user_cart:
+            print("\033[91mThe cart is empty.\033[0m")
+            input("Press Enter to continue...")
             return cart
 
-        indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
-        selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
+        clear_screen()
+        print(f"{'No':<4} {'|Product':<35} {'|Quantity':<12} {'|Unit Price':<15} {'|Total':<12}")
+        print("=====+=====================================+============+===============+==============")
+        for idx, item in enumerate(user_cart, 1):
+            print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
 
-        if not selected_items:
-            print("❌ No valid items selected.")
-            return cart
+        print("\n0. Go back to main menu")
 
-        for item in selected_items:
-            cart.remove(item)
+        try:
+            choice = input("\nEnter the numbers of items to delete (e.g. 1,2): ").strip()
 
-        print("✅ Selected items deleted from cart.")
-    except Exception as e:
-        print(f"❌ Error: {e}")
-    return cart
+            if choice == '0':
+                print("\033[91mDeletion cancelled.\033[0m")
+                input("Press Enter to continue...")
+                return cart
+
+            indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
+            selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
+
+            if not selected_items:
+                print("\033[91mNo valid items selected.\033[0m")
+                input("Press Enter to try again...")
+                continue  # Go back to top to re-display table
+
+            for item in selected_items:
+                cart.remove(item)
+
+            print("\033[96mSelected items deleted from cart.\033[0m")
+            input("Press Enter to continue...")
+            return cart  # Exit function after successful deletion
+
+        except Exception as e:
+            print(f"\033[91mError: {e}\033[0m")
+            input("Press Enter to try again...")
+            continue  # Re-display table on error
 
 def view_order_history(history, user_id):
-    user_history = [item for item in history if item['user_id'] == user_id]
+    user_history = [item for item in history if item['user_id'] == str(user_id)]
     if not user_history:
-        print(f"📦 No order history found for User ID {user_id}.")
+        print("\033[91mNo order history found.\033[0m")
+        input("Press Enter to return to main menu...")
         return
 
-    # Group by timestamp
     grouped_orders = defaultdict(list)
     for item in user_history:
         grouped_orders[item['timestamp']].append(item)
 
-    print(f"\n📄 Order History for User {user_id}:")
+    clear_screen()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                                    Order History                                    ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     for timestamp in sorted(grouped_orders.keys()):
         print(f"\n🕒 Order Time: {timestamp}")
@@ -364,25 +383,33 @@ def view_order_history(history, user_id):
         for idx, item in enumerate(grouped_orders[timestamp], 1):
             print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<12.2f} | ${item['total_price']:<9.2f}")
             group_total += item['total_price']
-        print(f"{'':<52} Subtotal: ${group_total:.2f}")
+        print(f"\033[33m{'':<52} Subtotal: ${group_total:.2f}\033[0m")
 
+    print("\n\033[92mEnd of all order history.\033[0m")
+    input("Press Enter to return to main menu...")
+    clear_screen()
+    
 def view_profile(user):
     clear_screen()
-    print("📄 Your Profile:")
-    print(f"👤 Username : {user['fullname']}")
-    print(f"📧 Email    : {user['email']}")
-    input("\nPress Enter to return to menu...")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                      View Profile                      ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print(f"Username : {user['fullname']}")
+    print(f"Email    : {user['email']}")
+    input("\nPress Enter to return to main menu...")
 
 # 更新资料
 def update_profile(user, users):
     while True:
         clear_screen()
-        print("✏️ What would you like to update?")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("                     Update Profile                     ")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("1. Name")
         print("2. Email")
         print("3. Password")
-        print("4. Cancel")
-        choice = input("Enter option (1-4): ").strip()
+        print("\n0. Go back main menu")
+        choice = input("Please enter your choice: ").strip()
 
         old_email = user["email"]
 
@@ -417,11 +444,10 @@ def update_profile(user, users):
                         return
             break
 
-        elif choice == "4":
+        elif choice == "0":
             return
         else:
-            print("❌ Invalid choice.")
-            input("Press Enter to try again...")
+            input("\033[91mInvalid choice. Press Enter to try again...\033[0m")
 
     save_users(users)
     input("Press Enter to return to menu...")
@@ -459,15 +485,15 @@ def category():
                             if int(product['stock']) > 0:
                                 add_to_cart(user_id, product, products, product_file)
                             else:
-                                input("This product is out of stock. Cannot add to cart.")
+                                input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
                             break
                         else:
-                            input("Invalid code. Please press Enter to try again.")
+                            input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
                     break  # Exit product detail loop
                 else:
-                    input("Invalid product ID. Please press Enter to try again.")
+                    input("\033[91mInvalid product ID. Please press Enter to try again.\033[0m")
         else:
-            input("Invalid category ID. Please press Enter to try again.")
+            input("\033[91mInvalid category ID. Please press Enter to try again.\033[0m")
 
 def shoppingcart():
     cart = load_cart()
@@ -479,36 +505,40 @@ def shoppingcart():
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
         print("1. View Shopping Cart & Purchase")
         print("2. Delete Items from Cart")
-        print("\n0. Exit")
+        print("\n0. Go back main menu")
         choice = input("Choose an option : ").strip()
         clear_screen()
         if choice == "1":
-            # user_id = input("Enter your User ID: ").strip()
             cart = view_and_purchase(cart, user_id)
             save_cart(cart)
         elif choice == "2":
-            # user_id = input("Enter your User ID: ").strip()
             cart = delete_items(cart, user_id)
             save_cart(cart)
         elif choice == "0":
             break
         else:
-            input("Invalid choice.Press Enter to try again....")
+            input("\033[91mInvalid choice. Press Enter to try again...\033[0m")
 
 def orderhistory():
     global user_id
     history = load_order_history()
     view_order_history(history, user_id)
 
-def feedback():
-    global user_id
-    print("Please select FeedBack type")
+def show_feedback_menu():
+    clear_screen()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                        Feedback                        ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")    
     print("1. Product")
     print("2. Staff")
-    print("0. Back to Main Menu")
-    
+    print("\n0. Back to Main Menu")
+
+def feedback():
+    global user_id
+
     while True:
-        choice = input("Please enter (1 or 2) : ")
+        show_feedback_menu()
+        choice = input("Please enter your choice : ")
         if choice == '1':
             title = 'Product'
             break
@@ -516,17 +546,20 @@ def feedback():
             title = 'Staff'
             break
         elif choice == '0':
+            clear_screen()
             menu()
-            break
+            return
         else:
-            print("Invalid input. Please enter again.")
+            print("\033[91mInvalid input. Please enter again.\033[0m")
+            input("Press Enter to continue...")
 
     user_input = input("Enter your FeedBack : ")
     
     with open("feedback.txt", "a", encoding="utf-8") as f:
         f.write(f"{user_id},{title},{user_input}\n")
     
-    print("Your FeedBack already saving. Thank you!")
+    input("\033[96mYour FeedBack already saving. Thank you!\033[0m")
+    clear_screen()
 
 def profile():
     global user_id
@@ -539,22 +572,22 @@ def profile():
         if user_id == user['id']:
             while True:
                 clear_screen()
-                print("=== MENU ===")
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print("                          Menu                          ")
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 print("1. View Profile")
                 print("2. Update Profile")
-                print("3. Logout")
-                option = input("Choose an option: ").strip()
+                print("\n0. Logout")
+                option = input("Please enter your choice: ").strip()
 
                 if option == "1":
                     view_profile(user)
                 elif option == "2":
                     update_profile(user, user_id)
-                elif option == "3":
-                    print("👋 Logged out.")
+                elif option == "0":
                     break
                 else:
-                    print("❌ Invalid option.")
-                    input("Press Enter to try again...")
+                    input("\033[91mInvalid option. Press Enter to try again...\033[0m")
         else:
             print("not user")
 
@@ -597,7 +630,7 @@ def menu():
                 print("case 0")
                 break
             case _:
-                print("Invalid input. Please choose between 0-5.")
+                print("\033[91mInvalid input. Please choose between 0-5.\033[0m")
                 input("\nPress Enter to return to the menu...")
                 clear_screen()
 
@@ -620,5 +653,5 @@ while True:
     elif first_choose == 0:
         exit()
     else:
-        input("\nInput Wrong.Please press Enter to try again")
+        input("\033[91m\nInput Wrong. Please press Enter to try again...\033[0m")
         clear_screen()

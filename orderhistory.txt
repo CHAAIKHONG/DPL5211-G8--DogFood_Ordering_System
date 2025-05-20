@@ -3,3 +3,9 @@
 1,Homemade Chicken & Rice Bowl,7,15.0,105.0,2025-05-19 15:55:48
 1,Beef & Sweet Potato Stew,11,16.0,176.0,2025-05-19 15:55:48
 1,Beef & Sweet Potato Stew,11,16.0,176.0,2025-05-19 15:55:48
+9,Stella & Chewy's Raw Patties,11,40.0,440.0,2025-05-20 17:07:04
+9,Open Farm Freeze-Dried Raw,24,48.0,1152.0,2025-05-20 17:11:44
+9,Acana Puppy Small Breed,49,45.99,2253.51,2025-05-20 17:13:14
+9,Acana Puppy Small Breed,1,45.99,45.99,2025-05-20 17:20:35
+9,Cesar Wet Dog Food Beef,3,2.5,7.5,2025-05-20 17:20:40
+9,Stella & Chewy's Raw Patties,1,40.0,40.0,2025-05-20 17:20:40

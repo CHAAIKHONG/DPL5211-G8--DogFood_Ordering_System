@@ -1,3 +1,1 @@
-9,Stella & Chewy's Raw Patties,11,40.0,440.0
-9,Open Farm Freeze-Dried Raw,24,48.0,1152.0
-9,Acana Puppy Small Breed,49,45.99,2253.51
+9,Cesar Wet Dog Food Beef,2,2.50,5.00
