@@ -1,4 +1,4 @@
-1,1,Acana Puppy Small Breed,45.99,0,High quality puppy dry food
+1,1,Acana Puppy Small Breed,45.99,1,High quality puppy dry food
 2,1,Orijen Original Dry Dog Food,55.00,0,Premium dry dog food with fresh ingredients
 1,2,Cesar Wet Dog Food Beef,2.50,0,Delicious wet food with real beef
 2,2,Pedigree Wet Food Chicken,2.30,0,Tasty wet food with chicken flavor

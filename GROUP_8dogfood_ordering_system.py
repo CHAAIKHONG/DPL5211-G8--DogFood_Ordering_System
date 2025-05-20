@@ -266,7 +266,8 @@ def save_cart(cart, filename="user_shoppingcart.txt"):
             f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']}\n")
 
 def view_and_purchase(cart, user_id):
-    user_cart = [item for item in cart if item['user_id'] == user_id]
+    user_cart = [item for item in cart if item['user_id'] == str(user_id)]
+
     if not user_cart:
         print("🛒 The cart is empty or the User ID does not exist.")
         return cart
@@ -278,7 +279,8 @@ def view_and_purchase(cart, user_id):
         print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<11} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
 
     try:
-        choice = input("\nEnter the numbers of items to purchase (e.g. 1,2) or -1 for all, or 0 to go back menu: ").strip()
+        print("\n0/Go back main menu")
+        choice = input("\nEnter the numbers of items to purchase (e.g. 1,2 or -1 for all): ").strip()
         if choice == '0':
             return cart
         elif choice == '-1':
@@ -472,11 +474,13 @@ def shoppingcart():
     global user_id
     while True:
         clear_screen()
-        print("==== Shopping Cart System ====")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("                     Shopping Cart                      ")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")        
         print("1. View Shopping Cart & Purchase")
         print("2. Delete Items from Cart")
-        print("3. Exit")
-        choice = input("Choose an option (1-3): ").strip()
+        print("\n0. Exit")
+        choice = input("Choose an option : ").strip()
         clear_screen()
         if choice == "1":
             # user_id = input("Enter your User ID: ").strip()
@@ -486,12 +490,10 @@ def shoppingcart():
             # user_id = input("Enter your User ID: ").strip()
             cart = delete_items(cart, user_id)
             save_cart(cart)
-        elif choice == "3":
-            print("Thank you! Exiting the program.")
+        elif choice == "0":
             break
         else:
-            print("❌ Invalid choice. Please enter 1 or 2.")
-        input("\nPress Enter to return to the menu...")
+            input("Invalid choice.Press Enter to try again....")
 
 def orderhistory():
     global user_id
