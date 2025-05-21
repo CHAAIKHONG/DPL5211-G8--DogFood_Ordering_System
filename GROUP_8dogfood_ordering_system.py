@@ -89,18 +89,26 @@ def load_order_history(filename="orderhistory.txt"):
         with open(filename, 'r', encoding='utf-8') as f:
             for line_num, line in enumerate(f, start=1):
                 parts = line.strip().split('|')
-                if len(parts) != 6:
-                    print(f"[❌ Line {line_num}] Skipped - Expected 6 parts but got {len(parts)}: {line.strip()}")
+                if len(parts) < 6:
+                    print(f"[❌ Line {line_num}] Skipped - Expected at least 6 parts but got {len(parts)}: {line.strip()}")
                     continue
                 try:
-                    user_id, product_name, quantity, unit_price, total_price, timestamp = parts
+                    # Extract base fields
+                    user_id, product_name, quantity, unit_price, total_price, timestamp = parts[:6]
+                    
+                    # Extract payment info if available
+                    payment_method = parts[6] if len(parts) > 6 else "Unknown"
+                    payment_details = parts[7] if len(parts) > 7 else "N/A"
+                    
                     history.append({
                         'timestamp': timestamp.strip(),
                         'user_id': user_id.strip(),
                         'product_name': product_name.strip(),
                         'quantity': int(quantity),
                         'unit_price': float(unit_price),
-                        'total_price': float(total_price)
+                        'total_price': float(total_price),
+                        'payment_method': payment_method.strip(),
+                        'payment_details': payment_details.strip()
                     })
                 except ValueError as e:
                     print(f"[❌ Line {line_num}] Error converting values: {e}")
@@ -300,48 +308,134 @@ def view_and_purchase(cart, user_id):
 
         if not user_cart:
             print("\033[91mThe cart is empty.\033[0m")
-            input("Press Enter to contiue...")
+            input("Press Enter to continue...")
             return cart
+        
         clear_screen()
         print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<13} {'|Unit Price':<14} {'|Total':<10}")
         print("=====+=====================================+=============+==============+==============")
         for idx, item in enumerate(user_cart, 1):
             print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<11} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
-
+        
         print("\n0. Go back to main menu")
         choice = input("\nEnter the numbers of items to purchase (e.g. 1,2 or -1 for all): ").strip()
 
         if choice == '0':
             return cart
-        elif choice == '-1':
-            selected_items = user_cart
-            break
+        
+        # Calculate selected items and total amount
+        if choice == '-1':
+            selected_items = user_cart.copy()
         else:
             try:
-                indices = [int(x) for x in choice.split('|') if x.strip().isdigit()]
-                selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
+                indices = [int(x.strip()) for x in choice.split(',') if x.strip().isdigit()]
+                selected_items = [user_cart[i-1] for i in indices if 1 <= i <= len(user_cart)]
                 if not selected_items:
                     print("\033[91mInvalid selection. Please enter valid item numbers.\033[0m")
                     input("Press Enter to try again...")
                     continue
-                break
             except Exception:
                 print("\033[91mInvalid input format. Please try again.\033[0m")
                 input("Press Enter to try again...")
                 continue
-    order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    try:
-        with open("orderhistory.txt", 'a', encoding='utf-8') as f:
+        
+        # Calculate total for selected items only
+        total_amount = sum(item['total_price'] for item in selected_items)
+        
+        # Payment method selection
+        while True:
+            clear_screen()
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("                     Payment Method                     ")
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print(f"Total Amount: ${total_amount:.2f}")
+            print("\n1. Cash on Delivery")
+            print("2. Visa")
+            print("0. Cancel Purchase")
+            
+            payment_choice = input("\nSelect payment method: ").strip()
+            
+            if payment_choice == '0':
+                return cart
+            elif payment_choice == '1':
+                payment_method = "Cash on Delivery"
+                payment_details = "N/A"
+                break
+            elif payment_choice == '2':
+                while True:
+                    clear_screen()
+                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                    print("                         Visa Payment                   ")
+                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                    card_number = input("Enter Visa card number (16 digits): ").strip()
+                    if len(card_number) != 16 or not card_number.isdigit():
+                        print("\033[91mInvalid card number. Must be 16 digits.\033[0m")
+                        input("Press Enter to try again...")
+                        continue
+                    
+                    expiry_date = input("Enter expiry date (MM/YY): ").strip()
+                    if len(expiry_date) != 5 or expiry_date[2] != '/':
+                        print("\033[91mInvalid expiry date format. Use MM/YY.\033[0m")
+                        input("Press Enter to try again...")
+                        continue
+                    
+                    cvv = input("Enter CVV (3 digits): ").strip()
+                    if len(cvv) != 3 or not cvv.isdigit():
+                        print("\033[91mInvalid CVV. Must be 3 digits.\033[0m")
+                        input("Press Enter to try again...")
+                        continue
+                    
+                    masked_card = f"****-****-****-{card_number[-4:]}"
+                    payment_method = "Visa"
+                    payment_details = f"Card: {masked_card}, Exp: {expiry_date}"
+                    break
+                break
+            else:
+                print("\033[91mInvalid choice. Please try again.\033[0m")
+                input("Press Enter to continue...")
+        
+        # Generate and display receipt
+        order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        
+        try:
+            # Save to order history
+            with open("orderhistory.txt", 'a', encoding='utf-8') as f:
+                for item in selected_items:
+                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{order_datetime}|{payment_method}|{payment_details}\n")
+            
+            # Display receipt to user
+            clear_screen()
+            print("========================================")
+            print("          PURCHASE RECEIPT              ")
+            print("========================================")
+            print(f"Order Date: {order_datetime}")
+            print(f"Payment Method: {payment_method}")
+            if payment_method == "Visa":
+                print(f"Payment Details: {payment_details}")
+            print("\n")
+            print(f"{'Product':<30} {'Qty':<5} {'Price':<10} {'Total':<10}")
+            print("-" * 55)
+            
             for item in selected_items:
-                f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{order_datetime}\n")
-        for item in selected_items:
-            cart.remove(item)
-        print("\033[96mPurchase completed.\033[0m")
-        input("Press Enter to contiue...")
-    except Exception as e:
-        print(f"\033[91mError: {e}\033[0m")
-
-    return cart
+                print(f"{item['product_name'][:29]:<30} {item['quantity']:<5} ${item['unit_price']:<9.2f} ${item['total_price']:<9.2f}")
+            
+            print("\n")
+            print(f"{'Total Amount:':<45} ${total_amount:.2f}")
+            print("========================================")
+            print("Thank you for your purchase!")
+            print("========================================")
+            
+            # Remove purchased items from cart
+            for item in selected_items:
+                cart.remove(item)
+            
+            input("\nPress Enter to return to main menu...")
+            return cart
+            
+        except Exception as e:
+            print(f"\033[91mError processing payment: {e}\033[0m")
+            input("Press Enter to try again...")
+            continue
 
 def delete_items(cart, user_id):
     while True:
@@ -405,11 +499,18 @@ def view_order_history(history, user_id):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     for timestamp in sorted(grouped_orders.keys()):
+        order_group = grouped_orders[timestamp]
+        first_item = order_group[0]
+        
         print(f"\n🕒 Order Time: {timestamp}")
-        print(f"{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<15} {'|Total':<10}")
+        print(f"💳 Payment Method: {first_item['payment_method']}")
+        if first_item['payment_method'] == "Visa":
+            print(f"🔒 Payment Details: {first_item['payment_details']}")
+            
+        print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<15} {'|Total':<10}")
         print("=====+=====================================+============+===============+==============")
         group_total = 0
-        for idx, item in enumerate(grouped_orders[timestamp], 1):
+        for idx, item in enumerate(order_group, 1):
             print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<12.2f} | ${item['total_price']:<9.2f}")
             group_total += item['total_price']
         print(f"\033[33m{'':<52} Subtotal: ${group_total:.2f}\033[0m")

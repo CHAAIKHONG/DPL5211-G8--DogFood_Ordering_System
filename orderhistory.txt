@@ -1,0 +1,5 @@
+1|Homemade Chicken & Rice Bowl|9|15.0|135.0|2025-05-21 17:01:46|Cash on Delivery|N/A
+1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-21 17:02:35|Visa|Card: ****-****-****-1111, Exp: 02/22
+1|Beef & Sweet Potato Stew|9|16.0|144.0|2025-05-21 17:27:30|Visa|Card: ****-****-****-1111, Exp: 03/25
+1|Primal Raw Frozen Chicken Nuggets|4|35.0|140.0|2025-05-21 17:27:30|Visa|Card: ****-****-****-1111, Exp: 03/25
+1|Instinct Freeze-Dried Raw Meals|2|50.0|100.0|2025-05-21 17:27:57|Cash on Delivery|N/A
