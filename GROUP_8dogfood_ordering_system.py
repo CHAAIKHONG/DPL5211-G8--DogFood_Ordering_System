@@ -15,22 +15,26 @@ def load_user_details(method, filename="users_details.txt"):
     if os.path.exists(filename):
         with open(filename, 'r', encoding='utf-8') as f:
             for index, line in enumerate(f):
-                parts = line.strip().split(',')
-                if len(parts) == 4:
+                parts = line.strip().split('|')
+                if len(parts) == 6:
                     if method == "register" or method == "login" or method == "profile":
-                        id, fullname, email, password = parts
+                        id, fullname, email, address, phonenumber, password = parts
                         user_details.append({
                             'id': int(id),
                             'fullname': fullname.strip(),
                             'email': email.strip(),
+                            'address': address.strip(),
+                            'phonenumber' : phonenumber.strip(),
                             'password': password.strip(),
                         })
                     elif method == "profile":
-                        id, username, email, password_hash = parts
+                        id, fullname, email, address, phonenumber, password = parts
                         user_details = {
                             "id": int(id),
                             "username": username.strip(),
                             "email": email.strip(),
+                            'address': address.strip(),
+                            'phonenumber' : phonenumber.strip(),
                             "password_hash": password_hash.strip()
                         }
 
@@ -41,9 +45,9 @@ def load_categories(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as file:
             for line in file:
-                line = line.strip().replace('，', ',')
+                line = line.strip().replace('|', '|')
                 if line:
-                    parts = line.split(',')
+                    parts = line.split('|')
                     if len(parts) == 2:
                         category_id = parts[0].strip()
                         category_name = parts[1].strip()
@@ -57,9 +61,9 @@ def load_products(filename):
     try:
         with open(filename, 'r', encoding='utf-8') as file:
             for line in file:
-                line = line.strip().replace('，', ',')
+                line = line.strip().replace('|', '|')
                 if line:
-                    parts = line.split(',')
+                    parts = line.split('|')
                     if len(parts) >= 6:
                         product_id = parts[0].strip()
                         category_id = parts[1].strip()
@@ -84,7 +88,7 @@ def load_order_history(filename="orderhistory.txt"):
     if os.path.exists(filename):
         with open(filename, 'r', encoding='utf-8') as f:
             for line_num, line in enumerate(f, start=1):
-                parts = line.strip().split(',')
+                parts = line.strip().split('|')
                 if len(parts) != 6:
                     print(f"[❌ Line {line_num}] Skipped - Expected 6 parts but got {len(parts)}: {line.strip()}")
                     continue
@@ -104,8 +108,8 @@ def load_order_history(filename="orderhistory.txt"):
 
 def save_users(users, filename="users_details.txt"):
     with open(filename, "w", encoding="utf-8") as f:
-        for user in users.values():
-            f.write(f"{user['id']},{user['fullname']},{user['email']},{user['password_hash']}\n")
+        for user in users:  # users is a list, not a dict
+            f.write(f"{user['id']}|{user['fullname']}|{user['email']}|{user['address']}|{user['phonenumber']}|{user['password']}\n")
 
 def register():
     clear_screen()
@@ -114,9 +118,25 @@ def register():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     
     fullname = str(input("Enter username         : "))
-    email = str(input("Enter your email       : "))
-
+    # Email validation loop
     while True:
+        email = str(input("Enter your email       : "))
+        if "@" in email and "." in email:
+            break
+        else:
+            print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
+
+    address = str(input("Enter home address     : "))
+    while True:
+        phonenumber = input("Enter phone number     : ").strip()
+        if phonenumber.isdigit():
+            break
+        else:
+            print("\033[91mInvalid phone number. Please enter number only.\033[0m")
+    max_attempts = 3
+    attempts = 0
+
+    while attempts < max_attempts:
         password = str(input("Enter password         : "))
         confirmpass = str(input("Enter confirm password : "))
         
@@ -126,13 +146,19 @@ def register():
             next_id = users[-1]['id'] + 1 if users else 1
 
             with open("users_details.txt", "a") as f:
-                f.write(f"{next_id},{fullname},{email},{hashed_password}\n")
+                f.write(f"{next_id}|{fullname}|{email}|{address}|{phonenumber}|{hashed_password}\n")
 
-            print("\nPassword confirmed! Registration successful.")
+            print("\n\033[96mPassword confirmed! Registration successful.\033[0m")
             input("Press Enter to continue...")
-            break
+            return  # Exit the function successfully
         else:
-            print("Passwords do not match. Please enter the password again.\n")
+            attempts += 1
+            remaining = max_attempts - attempts
+            if remaining > 0:
+                print(f"\033[91mPasswords do not match. You have {remaining} attempt(s) left.\033[0m\n")
+            else:
+                input("\033[91mToo many failed attempts.Press enter to continue....\033[0m")
+                return
 
 def login():
     global user_id
@@ -140,9 +166,11 @@ def login():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("                          Login                          ")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    verify = False
 
-    while not verify:
+    attempts = 0
+    max_attempts = 3
+
+    while attempts < max_attempts:
         email = str(input("Enter your email    : "))
         password = str(input("Enter your password : "))
         hidden_password = hashlib.sha256(password.encode()).hexdigest()
@@ -163,21 +191,22 @@ def login():
                 input("\nPress Enter to continue...")
                 clear_screen()
                 user_id = user['id']
-                verify = True
                 menu()
-                break
+                return  # Exit function if login successful
 
-        if not verify:
-            input("Invalid email or password. Please try again.")
-            clear_screen()
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print("                          Login                          ")
-            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        # If login fails
+        attempts += 1
+        remaining = max_attempts - attempts
+        if remaining > 0:
+            print(f"\033[91mInvalid email or password. You have {remaining} attempt(s) left.\033[0m\n")
+        else:
+            input("\033[91mToo many failed login attempts.Press enter to continue...\033[0m")
+            return
 
 def save_products(products, filename):
     with open(filename, 'w', encoding='utf-8') as file:
         for p in products:
-            line = f"{p['product_id']},{p['category_id']},{p['product_name']},{p['price']},{p['stock']},{p['details']}\n"
+            line = f"{p['product_id']}|{p['category_id']}|{p['product_name']}|{p['price']}|{p['stock']}|{p['details']}\n"
             file.write(line)
 
 def show_categories(categories):
@@ -199,7 +228,7 @@ def show_products_by_category(products, category_id, category_name):
             found = True
     if not found:
         print("\033[91mNo products found in this category.\033[0m")
-    print("\n0. Back")
+    print("\n0. Go back main menu")
 
 def show_product_detail(product):
     clear_screen()
@@ -208,7 +237,7 @@ def show_product_detail(product):
     print(f"Price       : ${product['price']}")
     print(f"Stock       : {product['stock']}")
     print(f"Details     : {product['details']}")
-    print("\n0. Back")
+    print("\n0. Go back main menu")
     if int(product['stock']) > 0:
         print("1. Add to cart")
     else:
@@ -235,7 +264,7 @@ def add_to_cart(user_id, product, products, product_file):
 
     total_price = float(product['price']) * quantity
     with open('user_shoppingcart.txt', 'a', encoding='utf-8') as f:
-        f.write(f"{user_id},{product['product_name']},{quantity},{product['price']},{total_price:.2f}\n")
+        f.write(f"{user_id}|{product['product_name']}|{quantity}|{product['price']}|{total_price:.2f}\n")
 
     # 更新库存
     product['stock'] = str(int(product['stock']) - quantity)
@@ -248,7 +277,7 @@ def load_cart(filename="user_shoppingcart.txt"):
     if os.path.exists(filename):
         with open(filename, 'r', encoding='utf-8') as f:
             for line in f:
-                parts = line.strip().split(',')
+                parts = line.strip().split('|')
                 if len(parts) == 5:
                     user_id, product_name, quantity, unit_price, total_price = parts
                     cart.append({
@@ -263,7 +292,7 @@ def load_cart(filename="user_shoppingcart.txt"):
 def save_cart(cart, filename="user_shoppingcart.txt"):
     with open(filename, 'w', encoding='utf-8') as f:
         for item in cart:
-            f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']}\n")
+            f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}\n")
 
 def view_and_purchase(cart, user_id):
     while True:
@@ -289,7 +318,7 @@ def view_and_purchase(cart, user_id):
             break
         else:
             try:
-                indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
+                indices = [int(x) for x in choice.split('|') if x.strip().isdigit()]
                 selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
                 if not selected_items:
                     print("\033[91mInvalid selection. Please enter valid item numbers.\033[0m")
@@ -304,7 +333,7 @@ def view_and_purchase(cart, user_id):
     try:
         with open("orderhistory.txt", 'a', encoding='utf-8') as f:
             for item in selected_items:
-                f.write(f"{item['user_id']},{item['product_name']},{item['quantity']},{item['unit_price']},{item['total_price']},{order_datetime}\n")
+                f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{order_datetime}\n")
         for item in selected_items:
             cart.remove(item)
         print("\033[96mPurchase completed.\033[0m")
@@ -339,7 +368,7 @@ def delete_items(cart, user_id):
                 input("Press Enter to continue...")
                 return cart
 
-            indices = [int(x) for x in choice.split(',') if x.strip().isdigit()]
+            indices = [int(x) for x in choice.split('|') if x.strip().isdigit()]
             selected_items = [user_cart[i - 1] for i in indices if 1 <= i <= len(user_cart)]
 
             if not selected_items:
@@ -394,8 +423,10 @@ def view_profile(user):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("                      View Profile                      ")
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(f"Username : {user['fullname']}")
-    print(f"Email    : {user['email']}")
+    print(f"Username      : {user['fullname']}")
+    print(f"Email         : {user['email']}")
+    print(f"Home address  : {user['address']}")
+    print(f"Phone number  : {user['phonenumber']}")
     input("\nPress Enter to return to main menu...")
 
 # 更新资料
@@ -408,41 +439,101 @@ def update_profile(user, users):
         print("1. Name")
         print("2. Email")
         print("3. Password")
+        print("4. Home address")
+        print("5. Phone number")
         print("\n0. Go back main menu")
         choice = input("Please enter your choice: ").strip()
 
         old_email = user["email"]
 
         if choice == "1":
+            print("\n=======================================")
             new_name = input("Enter new username: ").strip()
             if new_name:
                 user["fullname"] = new_name
-                print("✅ Username updated.")
+                # Update the user in the users list
+                for u in users:
+                    if u['id'] == user['id']:
+                        u['fullname'] = new_name
+                        break
+                save_users(users)
+                input("\033[96mUsername updated.Press enter to continue...\033[0m")
                 break
 
         elif choice == "2":
-            new_email = input("Enter new email: ").strip()
-            if new_email:
-                user["email"] = new_email
-                users[new_email] = user
-                del users[old_email]
-                print("✅ Email updated.")
-                break
+            while True:
+                print("\n=======================================")
+                new_email = input("Enter new email: ").strip()
+                
+                if "@" not in new_email or "." not in new_email:
+                    print("\033[91mInvalid email. Must contain '@' and '.'.\033[0m")
+                    continue
+                    
+                if new_email:
+                    if any(u['email'] == new_email for u in users if u['id'] != user['id']):
+                        input("\033[91mEmail already in use by another account. Press Enter to try again...\033[0m")
+                        continue
+                    
+                    user["email"] = new_email
+                    for u in users:
+                        if u['id'] == user['id']:
+                            u['email'] = new_email
+                            break
+                    save_users(users)
+                    input("\033[96mEmail updated. Press enter to continue...\033[0m")
+                    break
 
         elif choice == "3":
             while True:
+                print("\n=======================================")
                 new_pass = input("Enter new password: ").strip()
                 confirm_pass = input("Confirm password: ").strip()
                 if new_pass and new_pass == confirm_pass:
-                    user["password_hash"] = hashlib.sha256(new_pass.encode()).hexdigest()
-                    print("✅ Password updated.")
+                    new_hash = hashlib.sha256(new_pass.encode()).hexdigest()
+                    user["password"] = new_hash
+                    # Update the user in the users list
+                    for u in users:
+                        if u['id'] == user['id']:
+                            u['password'] = new_hash
+                            break
+                    save_users(users)
+                    input("\033[96mPassword updated.Press enter to continue...\033[0m")
                     break
                 else:
-                    print("❌ Passwords do not match. Please try again.")
-                    retry = input("Retry? (y/n): ").strip().lower()
+                    print("\033[91mPasswords do not match.\033[0m")
+                    retry = input("Do you want to try again? (y/n): ").strip().lower()
                     if retry != 'y':
                         return
             break
+
+        elif choice == "4":
+            print("\n=======================================")
+            new_address = input("Enter new home address: ").strip()
+            if new_address:
+                user["address"] = new_address
+                for u in users:
+                    if u['id'] == user['id']:
+                        u['address'] = new_address
+                        break
+                save_users(users)
+                input("\033[96mAddress updated. Press enter to continue...\033[0m")
+                break
+            
+        elif choice == "5": 
+            while True:
+                print("\n=======================================")
+                new_phone = input("Enter new phone number: ").strip()
+                if new_phone.isdigit():
+                    user["phonenumber"] = new_phone
+                    for u in users:
+                        if u['id'] == user['id']:
+                            u['phonenumber'] = new_phone
+                            break
+                    save_users(users)
+                    input("\033[96mPhone number updated.Press enter to continue...\033[0m")
+                    break
+                else:
+                    print("\033[91mInvalid phone number. Please enter number only.\033[0m")
 
         elif choice == "0":
             return
@@ -450,7 +541,7 @@ def update_profile(user, users):
             input("\033[91mInvalid choice. Press Enter to try again...\033[0m")
 
     save_users(users)
-    input("Press Enter to return to menu...")
+    # input("Press Enter to return to menu...")
 
 def category():
     product_file = "product.txt"
@@ -531,7 +622,7 @@ def show_feedback_menu():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")    
     print("1. Product")
     print("2. Staff")
-    print("\n0. Back to Main Menu")
+    print("\0. Go back main menu")
 
 def feedback():
     global user_id
@@ -556,40 +647,45 @@ def feedback():
     user_input = input("Enter your FeedBack : ")
     
     with open("feedback.txt", "a", encoding="utf-8") as f:
-        f.write(f"{user_id},{title},{user_input}\n")
+        f.write(f"{user_id}|{title}|{user_input}\n")
     
     input("\033[96mYour FeedBack already saving. Thank you!\033[0m")
     clear_screen()
 
 def profile():
     global user_id
-    # users = load_user_details("profile")
-    # user = login(users) 
-    user = load_user_details("profile")
+    users = load_user_details("profile")  # This loads all users
+    user = None
     
-    print(user)
-    for user in user:
-        if user_id == user['id']:
-            while True:
-                clear_screen()
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                print("                          Menu                          ")
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                print("1. View Profile")
-                print("2. Update Profile")
-                print("\n0. Logout")
-                option = input("Please enter your choice: ").strip()
+    # Find the current user
+    for u in users:
+        if user_id == u['id']:
+            user = u
+            break
+            
+    if user:
+        while True:
+            clear_screen()
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("                          Menu                          ")
+            print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+            print("1. View Profile")
+            print("2. Update Profile")
+            print("\n0. Go back main menu")
+            option = input("Please enter your choice: ").strip()
 
-                if option == "1":
-                    view_profile(user)
-                elif option == "2":
-                    update_profile(user, user_id)
-                elif option == "0":
-                    break
-                else:
-                    input("\033[91mInvalid option. Press Enter to try again...\033[0m")
-        else:
-            print("not user")
+            if option == "1":
+                view_profile(user)
+            elif option == "2":
+                update_profile(user, users)  # Pass both current user and all users
+            elif option == "0":
+                clear_screen()
+                break
+            else:
+                input("\033[91mInvalid option. Press Enter to try again...\033[0m")
+    else:
+        print("User not found")
+        input("Press Enter to continue...")
 
 def menu():
     while True:
@@ -641,7 +737,7 @@ while True:
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print("1. Login")
     print("2. Register")
-    print("0. Exit")
+    print("\n0. Exit")
     first_choose = int(input("Please Enter your choice : "))
 
     if first_choose == 1:
@@ -653,5 +749,5 @@ while True:
     elif first_choose == 0:
         exit()
     else:
-        input("\033[91m\nInput Wrong. Please press Enter to try again...\033[0m")
+        input("\033[91m\nInvalid input.Press Enter to try again...\033[0m")
         clear_screen()

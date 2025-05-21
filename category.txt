@@ -1,8 +1,8 @@
-id|Category
-1,Dry Food
-2,Wet Food
-3,Raw Food
-4,Freeze-Dried Food
-5,Homemade Style
-6,a
-7,b
+id,Category
+1|Dry Food
+2|Wet Food
+3|Raw Food
+4|Freeze-Dried Food
+5|Homemade Style
+6|a
+7|b
