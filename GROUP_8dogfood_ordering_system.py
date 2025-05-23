@@ -141,6 +141,55 @@ def save_users(users, filename="users_details.txt"):
         for user in users:  # users is a list, not a dict
             f.write(f"{user['id']}|{user['fullname']}|{user['email']}|{user['address']}|{user['phonenumber']}|{user['password']}\n")
 
+# def register():
+#     clear_screen()
+#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+#     print("                       Register                         ")
+#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    
+#     fullname = str(input("Enter username         : "))
+#     # Email validation loop
+#     while True:
+#         email = str(input("Enter your email       : "))
+#         if "@" in email and "." in email:
+#             break
+#         else:
+#             print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
+
+#     address = str(input("Enter home address     : "))
+#     while True:
+#         phonenumber = input("Enter phone number     : ").strip()
+#         if phonenumber.isdigit():
+#             break
+#         else:
+#             print("\033[91mInvalid phone number. Please enter number only.\033[0m")
+#     max_attempts = 3
+#     attempts = 0
+
+#     while attempts < max_attempts:
+#         password = str(input("Enter password         : "))
+#         confirmpass = str(input("Enter confirm password : "))
+        
+#         if password == confirmpass:
+#             hashed_password = hashlib.sha256(password.encode()).hexdigest()
+#             users = load_user_details("register")
+#             next_id = users[-1]['id'] + 1 if users else 1
+
+#             with open("users_details.txt", "a") as f:
+#                 f.write(f"{next_id}|{fullname}|{email}|{address}|{phonenumber}|{hashed_password}\n")
+
+#             print("\n\033[96mPassword confirmed! Registration successful.\033[0m")
+#             input("Press Enter to continue...")
+#             return  # Exit the function successfully
+#         else:
+#             attempts += 1
+#             remaining = max_attempts - attempts
+#             if remaining > 0:
+#                 print(f"\033[91mPasswords do not match. You have {remaining} attempt(s) left.\033[0m\n")
+#             else:
+#                 input("\033[91mToo many failed attempts.Press enter to continue....\033[0m")
+#                 return
+
 def register():
     clear_screen()
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -148,14 +197,23 @@ def register():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     
     fullname = str(input("Enter username         : "))
-    # Email validation loop
+    
+    users = load_user_details("register")  # 预加载一次现有用户
+    
+    # Email validation loop + duplicate checking
     while True:
         email = str(input("Enter your email       : "))
-        if "@" in email and "." in email:
-            break
-        else:
+        if "@" not in email or "." not in email:
             print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
-
+            continue
+        
+        # 检查 email 是否已存在
+        email_exists = any(user['email'] == email for user in users)
+        if email_exists:
+            print("\033[91mThis email is already registered. Please use a different email.\033[0m\n")
+        else:
+            break  # 通过格式和重复检查
+    
     address = str(input("Enter home address     : "))
     while True:
         phonenumber = input("Enter phone number     : ").strip()
@@ -172,7 +230,6 @@ def register():
         
         if password == confirmpass:
             hashed_password = hashlib.sha256(password.encode()).hexdigest()
-            users = load_user_details("register")
             next_id = users[-1]['id'] + 1 if users else 1
 
             with open("users_details.txt", "a") as f:
@@ -180,58 +237,15 @@ def register():
 
             print("\n\033[96mPassword confirmed! Registration successful.\033[0m")
             input("Press Enter to continue...")
-            return  # Exit the function successfully
+            return
         else:
             attempts += 1
             remaining = max_attempts - attempts
             if remaining > 0:
                 print(f"\033[91mPasswords do not match. You have {remaining} attempt(s) left.\033[0m\n")
             else:
-                input("\033[91mToo many failed attempts.Press enter to continue....\033[0m")
+                input("\033[91mToo many failed attempts. Press enter to continue....\033[0m")
                 return
-
-# def login():
-#     global user_id
-#     clear_screen()
-#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-#     print("                          Login                          ")
-#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-
-#     attempts = 0
-#     max_attempts = 3
-
-#     while attempts < max_attempts:
-#         email = str(input("Enter your email    : "))
-#         password = str(input("Enter your password : "))
-#         hidden_password = hashlib.sha256(password.encode()).hexdigest()
-#         users = load_user_details("login")
-
-#         for user in users:
-#             if email == user['email'] and hidden_password == user['password']:
-#                 clear_screen()
-#                 print("╔" + "═" * 50 + "╗")
-#                 print("║" + " " * 50 + "║")
-                
-#                 welcome_msg = f"Welcome, {user['fullname']}!"
-#                 centered_msg = welcome_msg.center(50)
-#                 print(f"║{centered_msg}║")
-                
-#                 print("║" + " " * 50 + "║")
-#                 print("╚" + "═" * 50 + "╝")
-#                 input("\nPress Enter to continue...")
-#                 clear_screen()
-#                 user_id = user['id']
-#                 menu()
-#                 return  # Exit function if login successful
-
-#         # If login fails
-#         attempts += 1
-#         remaining = max_attempts - attempts
-#         if remaining > 0:
-#             print(f"\033[91mInvalid email or password. You have {remaining} attempt(s) left.\033[0m\n")
-#         else:
-#             input("\033[91mToo many failed login attempts.Press enter to continue...\033[0m")
-#             return
 
 def login():
     global user_id
