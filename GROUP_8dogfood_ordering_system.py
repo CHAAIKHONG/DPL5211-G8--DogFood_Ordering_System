@@ -40,6 +40,28 @@ def load_user_details(method, filename="users_details.txt"):
 
     return user_details
 
+def load_admin_details(method, filename="staff.txt"):
+    admin_details  = []
+    global user_id
+    # print(f"id = {user_id}")
+    if os.path.exists(filename):
+        with open(filename, 'r', encoding='utf-8') as f:
+            for index, line in enumerate(f):
+                parts = line.strip().split('|')
+                if len(parts) == 6:
+                    if method == "register" or method == "login" or method == "profile":
+                        id, fullname, email, address, phonenumber, password = parts
+                        admin_details.append({
+                            'id': int(id),
+                            'fullname': fullname.strip(),
+                            'email': email.strip(),
+                            'address': address.strip(),
+                            'phonenumber' : phonenumber.strip(),
+                            'password': password.strip(),
+                        })
+
+    return admin_details
+
 def load_categories(filename):
     categories = {}
     try:
@@ -168,6 +190,49 @@ def register():
                 input("\033[91mToo many failed attempts.Press enter to continue....\033[0m")
                 return
 
+# def login():
+#     global user_id
+#     clear_screen()
+#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+#     print("                          Login                          ")
+#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+#     attempts = 0
+#     max_attempts = 3
+
+#     while attempts < max_attempts:
+#         email = str(input("Enter your email    : "))
+#         password = str(input("Enter your password : "))
+#         hidden_password = hashlib.sha256(password.encode()).hexdigest()
+#         users = load_user_details("login")
+
+#         for user in users:
+#             if email == user['email'] and hidden_password == user['password']:
+#                 clear_screen()
+#                 print("╔" + "═" * 50 + "╗")
+#                 print("║" + " " * 50 + "║")
+                
+#                 welcome_msg = f"Welcome, {user['fullname']}!"
+#                 centered_msg = welcome_msg.center(50)
+#                 print(f"║{centered_msg}║")
+                
+#                 print("║" + " " * 50 + "║")
+#                 print("╚" + "═" * 50 + "╝")
+#                 input("\nPress Enter to continue...")
+#                 clear_screen()
+#                 user_id = user['id']
+#                 menu()
+#                 return  # Exit function if login successful
+
+#         # If login fails
+#         attempts += 1
+#         remaining = max_attempts - attempts
+#         if remaining > 0:
+#             print(f"\033[91mInvalid email or password. You have {remaining} attempt(s) left.\033[0m\n")
+#         else:
+#             input("\033[91mToo many failed login attempts.Press enter to continue...\033[0m")
+#             return
+
 def login():
     global user_id
     clear_screen()
@@ -182,18 +247,21 @@ def login():
         email = str(input("Enter your email    : "))
         password = str(input("Enter your password : "))
         hidden_password = hashlib.sha256(password.encode()).hexdigest()
+
         users = load_user_details("login")
 
+        found = False
         for user in users:
             if email == user['email'] and hidden_password == user['password']:
+                found = True
                 clear_screen()
                 print("╔" + "═" * 50 + "╗")
                 print("║" + " " * 50 + "║")
-                
+
                 welcome_msg = f"Welcome, {user['fullname']}!"
                 centered_msg = welcome_msg.center(50)
                 print(f"║{centered_msg}║")
-                
+
                 print("║" + " " * 50 + "║")
                 print("╚" + "═" * 50 + "╝")
                 input("\nPress Enter to continue...")
@@ -201,6 +269,30 @@ def login():
                 user_id = user['id']
                 menu()
                 return  # Exit function if login successful
+                break
+
+        if not found:
+            # Try staff.txt
+            users = load_admin_details("login")
+            for user in users:
+                if email == user['email'] and hidden_password == user['password']:
+                    found = True
+                    clear_screen()
+                    print("╔" + "═" * 50 + "╗")
+                    print("║" + " " * 50 + "║")
+
+                    welcome_msg = f"Welcome, {user['fullname']} satff!"
+                    centered_msg = welcome_msg.center(50)
+                    print(f"║{centered_msg}║")
+
+                    print("║" + " " * 50 + "║")
+                    print("╚" + "═" * 50 + "╝")
+                    input("\nPress Enter to continue...")
+                    clear_screen()
+                    user_id = user['id']
+                    menu() # when admin part add in this file than menu() change to admin_menu()
+                    return  # Exit function if login successful
+                    break
 
         # If login fails
         attempts += 1
@@ -208,7 +300,7 @@ def login():
         if remaining > 0:
             print(f"\033[91mInvalid email or password. You have {remaining} attempt(s) left.\033[0m\n")
         else:
-            input("\033[91mToo many failed login attempts.Press enter to continue...\033[0m")
+            input("\033[91mToo many failed login attempts. Press enter to continue...\033[0m")
             return
 
 def save_products(products, filename):
