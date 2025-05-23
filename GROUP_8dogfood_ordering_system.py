@@ -225,22 +225,9 @@ def show_categories(categories):
         print(f"{category_id}. {category_name}")
     print("\n0. Go Back Menu")
 
-def show_products_by_category(products, category_id, category_name):
-    clear_screen()
-    print(f"Products in Category {category_name}:")
-    print("~" * 40)
-    found = False
-    for product in products:
-        if product['category_id'] == category_id:
-            print(f"{product['product_id']}. {product['product_name']} - ${product['price']}")
-            found = True
-    if not found:
-        print("\033[91mNo products found in this category.\033[0m")
-    print("\n0. Go back main menu")
-
 def show_product_detail(product):
     clear_screen()
-    print(f"Product ID  : {product['product_id']}")
+    # print(f"Product ID  : {product['product_id']}")
     print(f"Name        : {product['product_name']}")
     print(f"Price       : ${product['price']}")
     print(f"Stock       : {product['stock']}")
@@ -279,6 +266,164 @@ def add_to_cart(user_id, product, products, product_file):
     save_products(products, product_file)
     print("\033[96mProduct added to cart!\033[0m")
     input("Press Enter to continue...")
+
+def show_products_by_category(products, category_id, category_name):
+    clear_screen()
+    print(f"Products in Category {category_name}:")
+    print("~" * 40)
+    
+    # Filter products by category
+    category_products = [p for p in products if p['category_id'] == category_id]
+    
+    if not category_products:
+        print("\033[91mNo products found in this category.\033[0m")
+        print("\n0. Go back main menu")
+        return None, None
+    
+    # Add sorting options with input validation
+    while True:
+        clear_screen()
+        print(f"Products in Category {category_name}:")
+        print("~" * 40)
+        print("\nSort by:")
+        print("1. Price (Low to High)")
+        print("2. Price (High to Low)")
+        print("3. Name (A-Z)")
+        print("4. Name (Z-A)")
+        print("0. Skip sorting")
+        
+        sort_choice = input("\nEnter your choice: ").strip()
+        
+        if sort_choice == "0" or sort_choice == "":
+            # No sorting - maintain original order but keep product_id as reference
+            break
+        elif sort_choice == "1":
+            category_products.sort(key=lambda x: float(x['price']))
+            break
+        elif sort_choice == "2":
+            category_products.sort(key=lambda x: float(x['price']), reverse=True)
+            break
+        elif sort_choice == "3":
+            category_products.sort(key=lambda x: x['product_name'].lower())
+            break
+        elif sort_choice == "4":
+            category_products.sort(key=lambda x: x['product_name'].lower(), reverse=True)
+            break
+        else:
+            input("\033[91mInvalid choice. Please enter 1-4 or 0 to skip. Press Enter to try again...\033[0m")
+            continue
+    
+    # Display products with both original product_id and sequential numbering
+    clear_screen()
+    print(f"Products in Category {category_name}:")
+    print("~" * 40)
+    
+    # Create a mapping between display numbers and actual products
+    numbered_products = list(enumerate(category_products, start=1))
+    product_mapping = {str(num): product for num, product in numbered_products}
+    
+    for num, product in numbered_products:
+        print(f"{num}. {product['product_name']} - ${product['price']}")
+    
+    print("\n0. Go back main menu")
+    
+    # Return both the numbered products list and the mapping
+    return numbered_products, product_mapping
+
+def category():
+    product_file = "product.txt"
+    categories = load_categories("category.txt")
+    products = load_products(product_file)
+    global user_id
+
+    clear_screen()
+
+    while True:
+        clear_screen()
+        show_categories(categories)
+        # Add search option
+        print("\nEnter 's' to search products")
+        selected_option = input("\nEnter a category ID to view its products or option: ").strip().lower()
+        
+        if selected_option == "0":
+            clear_screen()
+            break
+        elif selected_option == "s":
+            # Search functionality
+            search_term = input("Enter product name to search: ").strip().lower()
+            found_products = [p for p in products if search_term in p['product_name'].lower()]
+            
+            if not found_products:
+                input("\033[91mNo products found. Press Enter to continue...\033[0m")
+                continue
+                
+            # Create a mapping between display numbers and actual products
+            numbered_products = list(enumerate(found_products, start=1))
+            product_mapping = {str(num): product for num, product in numbered_products}
+            
+            # Display search results with sequential numbers
+            clear_screen()
+            print(f"Search results for '{search_term}':")
+            print("~" * 40)
+            for num, product in numbered_products:
+                category_name = categories.get(product['category_id'], "Unknown Category")
+                print(f"{num}. {product['product_name']} (Category: {category_name}) - ${product['price']}")
+            
+            # Allow viewing product details from search results
+            selected_number = input("\nEnter product number to see details (or 0 to go back): ").strip()
+            if selected_number == "0":
+                continue
+                
+            # Get the actual product using the mapping
+            product = product_mapping.get(selected_number)
+            if product:
+                while True:
+                    show_product_detail(product)
+                    choice = input("Choose an option: ").strip()
+                    if choice == "0":
+                        break
+                    elif choice == "1":
+                        if int(product['stock']) > 0:
+                            add_to_cart(user_id, product, products, product_file)
+                        else:
+                            input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
+                        break
+                    else:
+                        input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
+            else:
+                input("\033[91mInvalid product number. Please press Enter to try again.\033[0m")
+                
+        elif selected_option in categories:
+            while True:
+                numbered_products, product_mapping = show_products_by_category(products, selected_option, categories[selected_option])
+                if numbered_products is None:  # No products in category
+                    break
+                                    
+                selected_number = input("\nEnter a product number to see details (or 0 to go back): ").strip()
+                if selected_number == "0":
+                    break
+                                
+                # Get the actual product using the mapping
+                product = product_mapping.get(selected_number)
+                if product:
+                    while True:
+                        show_product_detail(product)
+                        choice = input("Choose an option: ").strip()
+                        if choice == "0":
+                            break
+                        elif choice == "1":
+                            if int(product['stock']) > 0:
+                                add_to_cart(user_id, product, products, product_file)
+                            else:
+                                input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
+                            break
+                        else:
+                            input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
+                    break  # Exit product detail loop
+                else:
+                    input("\033[91mInvalid product number. Please press Enter to try again.\033[0m")
+        else:
+            input("\033[91mInvalid category ID or option. Please press Enter to try again.\033[0m")
 
 def load_cart(filename="user_shoppingcart.txt"):
     cart = []
@@ -328,14 +473,26 @@ def view_and_purchase(cart, user_id):
             selected_items = user_cart.copy()
         else:
             try:
-                indices = [int(x.strip()) for x in choice.split(',') if x.strip().isdigit()]
-                selected_items = [user_cart[i-1] for i in indices if 1 <= i <= len(user_cart)]
-                if not selected_items:
-                    print("\033[91mInvalid selection. Please enter valid item numbers.\033[0m")
+                # First validate all input numbers
+                input_numbers = [x.strip() for x in choice.split(',')]
+                invalid_numbers = [num for num in input_numbers if not num.isdigit() or int(num) < 1 or int(num) > len(user_cart)]
+                
+                if invalid_numbers:
+                    print(f"\033[91mInvalid item numbers: {', '.join(invalid_numbers)}. Please enter numbers between 1 and {len(user_cart)}.\033[0m")
                     input("Press Enter to try again...")
                     continue
-            except Exception:
-                print("\033[91mInvalid input format. Please try again.\033[0m")
+                
+                # All numbers are valid, get the items
+                indices = [int(x) for x in input_numbers]
+                selected_items = [user_cart[i-1] for i in indices]
+                
+                if not selected_items:
+                    print("\033[91mNo valid items selected.\033[0m")
+                    input("Press Enter to try again...")
+                    continue
+                    
+            except Exception as e:
+                print(f"\033[91mInvalid input format: {e}. Please try again.\033[0m")
                 input("Press Enter to try again...")
                 continue
         
@@ -367,23 +524,64 @@ def view_and_purchase(cart, user_id):
                     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                     print("                         Visa Payment                   ")
                     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                    card_number = input("Enter Visa card number (16 digits): ").strip()
-                    if len(card_number) != 16 or not card_number.isdigit():
-                        print("\033[91mInvalid card number. Must be 16 digits.\033[0m")
-                        input("Press Enter to try again...")
-                        continue
                     
-                    expiry_date = input("Enter expiry date (MM/YY): ").strip()
-                    if len(expiry_date) != 5 or expiry_date[2] != '/':
-                        print("\033[91mInvalid expiry date format. Use MM/YY.\033[0m")
-                        input("Press Enter to try again...")
-                        continue
+                    # Enhanced Visa card number input with auto-formatting
+                    while True:
+                        card_number = input("Enter Visa card number (16 digits, starts with 4): ").replace(" ", "").replace("-", "")
+                        if not card_number.isdigit():
+                            print("\033[91mCard number must contain only digits.\033[0m")
+                            continue
+                        if len(card_number) != 16:
+                            print("\033[91mCard number must be exactly 16 digits.\033[0m")
+                            continue
+                        if not card_number.startswith('4'):
+                            print("\033[91mVisa cards must start with 4.\033[0m")
+                            continue
+                        break
                     
-                    cvv = input("Enter CVV (3 digits): ").strip()
-                    if len(cvv) != 3 or not cvv.isdigit():
-                        print("\033[91mInvalid CVV. Must be 3 digits.\033[0m")
-                        input("Press Enter to try again...")
-                        continue
+                    # Format the card number for display as user types
+                    formatted_card = ' '.join([card_number[i:i+4] for i in range(0, 16, 4)])
+                    print(f"Formatted card: {formatted_card}")
+                    
+                    # Enhanced expiry date validation
+                    while True:
+                        expiry_date = input("Enter expiry date (MM/YY): ").strip()
+                        if len(expiry_date) != 5 or expiry_date[2] != '/':
+                            print("\033[91mInvalid format. Use MM/YY (e.g. 12/25).\033[0m")
+                            continue
+                        
+                        try:
+                            month = int(expiry_date[:2])
+                            year = int(expiry_date[3:])
+                            current_year = datetime.now().year % 100
+                            current_month = datetime.now().month
+                            
+                            # Validate month
+                            if month < 1 or month > 12:
+                                print("\033[91mInvalid month. Must be between 01-12.\033[0m")
+                                continue
+                            
+                            # Validate year (current year to current year + 5)
+                            if year < current_year or year > current_year + 5:
+                                print(f"\033[91mExpiry year must be between {current_year} and {current_year + 5}.\033[0m")
+                                continue
+                            
+                            # If current year, check month hasn't passed
+                            if year == current_year and month < current_month:
+                                print("\033[91mThis card has already expired.\033[0m")
+                                continue
+                            
+                            break
+                        except ValueError:
+                            print("\033[91mInvalid date. Use numbers only (e.g. 12/25).\033[0m")
+                    
+                    # CVV validation
+                    while True:
+                        cvv = input("Enter CVV (3 digits): ").strip()
+                        if len(cvv) != 3 or not cvv.isdigit():
+                            print("\033[91mInvalid CVV. Must be exactly 3 digits.\033[0m")
+                            continue
+                        break
                     
                     masked_card = f"****-****-****-{card_number[-4:]}"
                     payment_method = "Visa"
@@ -395,20 +593,50 @@ def view_and_purchase(cart, user_id):
                 input("Press Enter to continue...")
         
         # Generate and display receipt
-        order_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        order_datetime = datetime.now()
+        formatted_datetime = order_datetime.strftime('%Y-%m-%d %H:%M:%S')
         
         try:
+            # Create receipt folder if it doesn't exist
+            if not os.path.exists('receipt'):
+                os.makedirs('receipt')
+            
+            # Generate a unique filename for the receipt
+            receipt_filename = f"receipt/receipt_{user_id}_{order_datetime.strftime('%Y%m%d_%H%M%S')}.txt"
+            
+            # Save receipt to file
+            with open(receipt_filename, 'w', encoding='utf-8') as f:
+                f.write("============================================================\n")
+                f.write("                      PURCHASE RECEIPT                      \n")
+                f.write("============================================================\n")
+                f.write(f"Order Date: {formatted_datetime}\n")
+                f.write(f"User ID: {user_id}\n")
+                f.write(f"Payment Method: {payment_method}\n")
+                if payment_method == "Visa":
+                    f.write(f"Payment Details: {payment_details}\n")
+                f.write("\n")
+                f.write(f"{'Product':<30} {'Qty':<5} {'Price':<10} {'Total':<10}\n")
+                f.write("-" * 55 + "\n")
+                
+                for item in selected_items:
+                    f.write(f"{item['product_name'][:29]:<30} {item['quantity']:<5} ${item['unit_price']:<9.2f} ${item['total_price']:<9.2f}\n")
+                f.write("\n")
+                f.write(f"{'Total Amount:':<45} ${total_amount:.2f}\n")
+                f.write("============================================================\n")
+                f.write("                Thank you for your purchase!                \n")
+                f.write("============================================================\n")
+            
             # Save to order history
             with open("orderhistory.txt", 'a', encoding='utf-8') as f:
                 for item in selected_items:
-                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{order_datetime}|{payment_method}|{payment_details}\n")
+                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{formatted_datetime}|{payment_method}|{payment_details}\n")
             
             # Display receipt to user
             clear_screen()
-            print("========================================")
-            print("          PURCHASE RECEIPT              ")
-            print("========================================")
-            print(f"Order Date: {order_datetime}")
+            print("============================================================")
+            print("                      PURCHASE RECEIPT                      ")
+            print("============================================================")
+            print(f"Order Date: {formatted_datetime}")
             print(f"Payment Method: {payment_method}")
             if payment_method == "Visa":
                 print(f"Payment Details: {payment_details}")
@@ -418,12 +646,11 @@ def view_and_purchase(cart, user_id):
             
             for item in selected_items:
                 print(f"{item['product_name'][:29]:<30} {item['quantity']:<5} ${item['unit_price']:<9.2f} ${item['total_price']:<9.2f}")
-            
             print("\n")
-            print(f"{'Total Amount:':<45} ${total_amount:.2f}")
-            print("========================================")
-            print("Thank you for your purchase!")
-            print("========================================")
+            print(f"\033[33m{'Total Amount:':<45} ${total_amount:.2f}\033[0m")
+            print("============================================================")
+            print("                Thank you for your purchase!                ")
+            print("============================================================")
             
             # Remove purchased items from cart
             for item in selected_items:
@@ -436,7 +663,7 @@ def view_and_purchase(cart, user_id):
             print(f"\033[91mError processing payment: {e}\033[0m")
             input("Press Enter to try again...")
             continue
-
+               
 def delete_items(cart, user_id):
     while True:
         user_cart = [item for item in cart if item['user_id'] == str(user_id)]
@@ -644,48 +871,48 @@ def update_profile(user, users):
     save_users(users)
     # input("Press Enter to return to menu...")
 
-def category():
-    product_file = "product.txt"
-    categories = load_categories("category.txt")
-    products = load_products(product_file)
-    global user_id
+# def category():
+#     product_file = "product.txt"
+#     categories = load_categories("category.txt")
+#     products = load_products(product_file)
+#     global user_id
 
-    clear_screen()
+#     clear_screen()
 
-    while True:
-        clear_screen()
-        show_categories(categories)
+#     while True:
+#         clear_screen()
+#         show_categories(categories)
         
-        selected_category = input("\nEnter a category ID to view its products : ").strip()
-        if selected_category == "0":
-            clear_screen()
-            break
-        elif selected_category in categories:
-            while True:
-                show_products_by_category(products, selected_category, categories[selected_category])
-                selected_product = input("\nEnter a product ID to see details (or 0 to go back): ").strip()
-                if selected_product == "0":
-                    break
-                product = next((p for p in products if p['product_id'] == selected_product and p['category_id'] == selected_category), None)
-                if product:
-                    while True:
-                        show_product_detail(product)
-                        choice = input("Choose an option: ").strip()
-                        if choice == "0":
-                            break
-                        elif choice == "1":
-                            if int(product['stock']) > 0:
-                                add_to_cart(user_id, product, products, product_file)
-                            else:
-                                input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
-                            break
-                        else:
-                            input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
-                    break  # Exit product detail loop
-                else:
-                    input("\033[91mInvalid product ID. Please press Enter to try again.\033[0m")
-        else:
-            input("\033[91mInvalid category ID. Please press Enter to try again.\033[0m")
+#         selected_category = input("\nEnter a category ID to view its products : ").strip()
+#         if selected_category == "0":
+#             clear_screen()
+#             break
+#         elif selected_category in categories:
+#             while True:
+#                 show_products_by_category(products, selected_category, categories[selected_category])
+#                 selected_product = input("\nEnter a product ID to see details (or 0 to go back): ").strip()
+#                 if selected_product == "0":
+#                     break
+#                 product = next((p for p in products if p['product_id'] == selected_product and p['category_id'] == selected_category), None)
+#                 if product:
+#                     while True:
+#                         show_product_detail(product)
+#                         choice = input("Choose an option: ").strip()
+#                         if choice == "0":
+#                             break
+#                         elif choice == "1":
+#                             if int(product['stock']) > 0:
+#                                 add_to_cart(user_id, product, products, product_file)
+#                             else:
+#                                 input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
+#                             break
+#                         else:
+#                             input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
+#                     break  # Exit product detail loop
+#                 else:
+#                     input("\033[91mInvalid product ID. Please press Enter to try again.\033[0m")
+#         else:
+#             input("\033[91mInvalid category ID. Please press Enter to try again.\033[0m")
 
 def shoppingcart():
     cart = load_cart()
