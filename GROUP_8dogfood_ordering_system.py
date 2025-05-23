@@ -500,6 +500,7 @@ def category():
                 input("\033[91mInvalid product number. Please press Enter to try again.\033[0m")
                 
         elif selected_option in categories:
+            
             while True:
                 numbered_products, product_mapping = show_products_by_category(products, selected_option, categories[selected_option])
                 if numbered_products is None:  # No products in category
