@@ -28,7 +28,7 @@ def load_user_details(method, filename="users_details.txt"):
                             'password': password.strip(),
                         })
                     elif method == "profile":
-                        id, fullname, email, address, phonenumber, password = parts
+                        id, username, password_hash, fullname, email, address, phonenumber, password = parts
                         user_details = {
                             "id": int(id),
                             "username": username.strip(),

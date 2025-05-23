@@ -1,5 +1,5 @@
 1|1|Acana Puppy Small Breed|45.99|0|High quality puppy dry food
-2|1|Orijen Original Dry Dog Food|55.00|4|Premium dry dog food with fresh ingredients
+2|1|Orijen Original Dry Dog Food|55.00|3|Premium dry dog food with fresh ingredients
 3|2|Cesar Wet Dog Food Beef|2.50|55|Delicious wet food with real beef
 4|2|Pedigree Wet Food Chicken|2.30|88|Tasty wet food with chicken flavor
 5|3|Primal Raw Frozen Chicken Nuggets|35.00|67|Raw frozen chicken nuggets for dogs
