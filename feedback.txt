@@ -1,5 +1,5 @@
-1|Product|good quantity
-9|Product|dhasljkdnbsaldkbnsadsaljdas
-9|Staff|asdsadadsaddadsadsadasdsad good
-9|Product|eqwewqeqw
-9|Staff|afsfdsafadfdsfdasfadsfasfadsfasdfdfadsfasdf
+1|Product|good quantity|Thank you!
+9|Product|dhasljkdnbsaldkbnsadsaljdas|What? Can you expplain more thank you!
+9|Staff|asdsadadsaddadsadsadasdsad good|Thank for your purchase!
+9|Product|eqwewqeqw|Have any problem I can help?
+9|Staff|afsfdsafadfdsfdasfadsfasfadsfasdfdfadsfasdf|

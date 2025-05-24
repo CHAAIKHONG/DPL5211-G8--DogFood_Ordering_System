@@ -469,29 +469,32 @@ def display_orders(orders, title="", show_footer=True, pause=True):
         input("\nPress Enter to return...")
   
 def manage_feedback():
-    def clear_screen():
-        print("\n" * 100)  # basic screen clear
+    clear_screen()
 
     def load_data(file):
         try:
             with open(file, "r") as f:
                 lines = f.readlines()
-            return [line.strip().split("|") for line in lines]
+            return [line.strip().split("|") + [""] * (4 - len(line.strip().split("|"))) for line in lines]
         except FileNotFoundError:
             return []
 
-    def save_reply(feedback_id, reply):
-        with open("feedback_replies.txt", "a") as f:
-            f.write(f"{feedback_id}|{reply}\n")
+    def save_data(file, data):
+        with open(file, "w") as f:
+            for row in data:
+                f.write("|".join(row) + "\n")
 
-    def display_feedback(data):
-        print("\n--- Feedback Entries ---")
-        print("ID | Category | Message")
-        print("-" * 40)
-        for row in data:
-            print(" | ".join(row))
+    def display_feedback(data, title="Feedback Entries"):
+        print("-" * 130)
+        print(" " * ((110 - len(title)) // 2) + title)
+        print("-" * 130)
+        print(f"{'FID':<5} | {'Customer ID':<12} | {'Category':<10} | {'Message':<45} | {'Reply':<25}")
+        print("-" * 130)
+        for index, row in enumerate(data, start=1):
+            customer_id, category, message, reply = row
+            print(f"{index:<5} | {customer_id:<12} | {category:<10} | {message:<45} | {reply:<25}")
+        print("-" * 130)
 
-    clear_screen()
     file = "feedback.txt"
     data = load_data(file)
 
@@ -503,26 +506,75 @@ def manage_feedback():
     display_feedback(data)
 
     while True:
-        print("\nOptions:")
-        print("1. Reply to Feedback")
-        print("2. Return to Main Menu")
+        print("\n1. Reply to Feedback")
+        print("2. Edit a Reply")
+        print("3. View Only Unreplied Feedback")
+        print("4. View Only Replied Feedback")
+        print("0. Return to Main Menu")
         choice = input("Enter your choice: ")
 
         if choice == "1":
-            feedback_id = input("Enter Feedback ID to reply: ").strip()
-            matched = [row for row in data if row[0] == feedback_id]
+            clear_screen()
+            display_feedback(data)
+            try:
+                feedback_index = int(input("Enter Feedback ID to reply: ").strip())
+                if 1 <= feedback_index <= len(data):
+                    selected = data[feedback_index - 1]
+                    if selected[3].strip() != "":
+                        print("⚠️ This feedback already has a reply.")
+                        print(f"Current Reply: {selected[3]}")
+                        continue
+                    print(f"\nOriginal Feedback: {' | '.join(selected[:3])}")
+                    reply = input("Enter your reply: ")
+                    data[feedback_index - 1][3] = reply
+                    save_data(file, data)
+                    print("✅ Reply saved successfully.")
+                    display_feedback(data)
+                else:
+                    print("❌ Invalid Feedback ID.")
+            except ValueError:
+                print("❌ Please enter a valid number.")
 
-            if matched:
-                print(f"\nOriginal Feedback: {' | '.join(matched[0])}")
-                reply = input("Enter your reply: ")
-                save_reply(feedback_id, reply)
-                print("Reply saved successfully.")
-            else:
-                print("Invalid Feedback ID.")
         elif choice == "2":
+            clear_screen()
+            display_feedback(data)
+            try:
+                feedback_index = int(input("Enter Feedback ID to edit reply: ").strip())
+                if 1 <= feedback_index <= len(data):
+                    current_reply = data[feedback_index - 1][3]
+                    if current_reply.strip() == "":
+                        print("❌ This feedback has no reply yet.")
+                    else:
+                        print(f"Current Reply: {current_reply}")
+                        new_reply = input("Enter new reply: ")
+                        data[feedback_index - 1][3] = new_reply
+                        save_data(file, data)
+                        print("✅ Reply updated successfully.")
+                        display_feedback(data)
+                else:
+                    print("❌ Invalid Feedback ID.")
+            except ValueError:
+                print("❌ Please enter a valid number.")
+
+        elif choice == "3":
+            clear_screen()
+            unreplied = [row for row in data if row[3].strip() == ""]
+            display_feedback(unreplied, "Unreplied Feedback Only")
+
+        elif choice == "4":
+            clear_screen()
+            replied = [row for row in data if row[3].strip() != ""]
+            display_feedback(replied, "Replied Feedback Only")
+
+        elif choice == "5":
+            clear_screen()
+            display_feedback(data, "All Feedback Entries")
+
+        elif choice == "0":
             break
+
         else:
-            print("Invalid option. Try again.")
+            print("⚠️ Invalid option. Try again.")
 
     input("\nPress Enter to return...")
 
