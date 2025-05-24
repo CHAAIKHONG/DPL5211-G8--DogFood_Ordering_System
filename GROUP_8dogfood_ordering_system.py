@@ -1476,9 +1476,9 @@ def manage_order():
         print("--- Order Management ---")
         print("1. View all orders")
         print("2. Filter by payment method")
-        print("3. Filter by Customer ID")
-        print("4. Filter by Delivery Status")
-        print("5. Update Delivery Status")
+        # print("3. Filter by Customer ID")
+        print("3. Filter by Delivery Status")
+        print("4. Update Delivery Status")
         print("0. Return to main menu")
         choice = input("\nSelect an option: ")
 
@@ -1491,14 +1491,19 @@ def manage_order():
             print("Filter Options:")
             print("1. Visa")
             print("2. Cash on Delivery")
-            method_choice = input("Select method (or Enter for all): ")
+            while True:
+                method_choice = input("Select method (or Enter for all): ")
 
-            method = ""
-            if method_choice == "1":
-                method = "Visa"
-            elif method_choice == "2":
-                method = "Cash on Delivery"
-
+                method = ""
+                if method_choice == "1":
+                    method = "Visa"
+                    break
+                elif method_choice == "2":
+                    method = "Cash on Delivery"
+                    break
+                else:
+                    input("\033[91mInvalid Method option. Please press Enter to try again.\033[0m")
+                    
             if method:
                 filtered = [o for o in orders if o['PaymentMethod'].lower() == method.lower()]
                 title = f"Orders Paid by {method}"
@@ -1509,24 +1514,29 @@ def manage_order():
             clear_screen()
             display_orders(filtered, title)
 
-        elif choice == "3":
-            cid = input("Enter Customer ID to filter: ")
-            filtered = [o for o in orders if o['CustomerID'] == cid]
-            clear_screen()
-            title = f"Orders for Customer ID {cid}"
-            display_orders(filtered, title)
+        # elif choice == "3":
+        #     cid = input("Enter Customer ID to filter: ")
+        #     filtered = [o for o in orders if o['CustomerID'] == cid]
+        #     clear_screen()
+        #     title = f"Orders for Customer ID {cid}"
+        #     display_orders(filtered, title)
 
-        elif choice == "4":
+        elif choice == "3":
             print("Filter Status:")
             print("1. Pending")
             print("2. Completed")
-            status_choice = input("Select status (or Enter for all): ")
+            while True:
+                status_choice = input("Select status (or Enter for all): ")
 
-            status = ""
-            if status_choice == "1":
-                status = "Pending"
-            elif status_choice == "2":
-                status = "Completed"
+                status = ""
+                if status_choice == "1":
+                    status = "Pending"
+                    break
+                elif status_choice == "2":
+                    status = "Completed"
+                    break
+                else:
+                    input("\033[91mInvalid Method option. Please press Enter to try again.\033[0m")
 
             if status:
                 filtered = [o for o in orders if o['DeliveryStatus'] == status]
@@ -1538,7 +1548,7 @@ def manage_order():
             clear_screen()
             display_orders(filtered, title)
 
-        elif choice == "5":
+        elif choice == "4":
             clear_screen()
             display_orders(orders, "All Orders", show_footer=False, pause=False)
             oid_str = input("Enter Order ID to mark as Completed: ").strip()
