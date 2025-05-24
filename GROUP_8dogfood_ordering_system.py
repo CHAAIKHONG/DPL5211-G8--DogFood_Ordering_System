@@ -1137,7 +1137,8 @@ def menu():
 # ------------------------------- admin module --------------------------------------------------------------------------
 def show_main_menu(role):
     clear_screen()
-    print("\n=== Admin Dashboard ===")
+    print("========== Admin Dashboard ==========")
+    print("=====================================")
     print("1. Manage Category")
     print("2. Manage Product")
     print("3. Manage Order")
@@ -1147,7 +1148,7 @@ def show_main_menu(role):
         print("6. Manage Staff Account")
     else:
         print("6. Profile")
-    print("0. Logout")
+    print("\n0. Logout")
 
 def load_data(filename, delimiter="|"):
     if not os.path.exists(filename):
@@ -1196,15 +1197,15 @@ def manage_category():
         nonlocal data
         name = input("Enter new category name: ").strip()
         if not name:
-            print("⚠ Category name cannot be empty.")
+            print("\033[91mCategory name cannot be empty.\033[0m")
         elif any(row[1].lower() == name.lower() for row in data):
-            print("⚠ Category already exists.")
+            print("\033[91mCategory already exists.\033[0m")
         else:
             new_id = str(int(data[-1][0]) + 1 if data else 1)
             data.append([new_id, name])
             save_data(file, data)
-            print("✅ Category added.")
-        input("Press Enter to continue...")
+            input("\033[96mCategory added successfully. Press Enter to continue...\033[0m")
+        input("enter")
 
     def edit_category():
         nonlocal data
@@ -1214,16 +1215,16 @@ def manage_category():
                 print(f"\nCurrent name: {row[1]}")
                 new_name = input("Enter new category name: ").strip()
                 if not new_name:
-                    print("⚠ Name cannot be empty.")
+                    print("\033[91mName cannot be empty.\033[0m")
                 elif any(r[1].lower() == new_name.lower() and r[0] != edit_id for r in data):
-                    print("⚠ Duplicate category name.")
+                    print("\033[91mDuplicate category name.\033[0m")
                 else:
                     row[1] = new_name
                     save_data(file, data)
-                    print("✅ Category updated.")
+                    print("\033[96mCategory updated.\033[0m")
                 break
         else:
-            print("❌ Category ID not found.")
+            print("\033[91mCategory ID not found.\033[0m")
         input("Press Enter to continue...")
 
     def delete_category():
@@ -1232,19 +1233,20 @@ def manage_category():
         if any(row[0] == del_id for row in data):
             data = [row for row in data if row[0] != del_id]
             save_data(file, data)
-            print("✅ Category deleted.")
+            print("\033[96mCategory deleted.\033[0m")
         else:
-            print("❌ Category ID not found.")
+            print("\033[91mCategory ID not found.\033[0m")
         input("Press Enter to continue...")
 
     while True:
         clear_screen()
-        print("--- Manage Category ---")
+        print("========== Manage Category ==========")
+        print("=====================================")
         print("1. View Categories")
         print("2. Add Category")
         print("3. Edit Category")
         print("4. Delete Category")
-        print("0. Back to Main Menu")
+        print("\n0. Back to Main Menu")
         choice = input("\nSelect option: ").strip()
 
         if choice == "1":
@@ -1265,8 +1267,7 @@ def manage_category():
         elif choice == "0":
             break
         else:
-            print("⚠ Invalid option.")
-            input("Press Enter to continue...")
+            input("\033[91mInvalid option. Press Enter to try again...\033[0m")
 # manage product
 def manage_product():
     file = "product.txt"
@@ -1275,14 +1276,14 @@ def manage_product():
     while True:
         clear_screen()
         display_product_list(data, status_filter="active")
-        print("\n------------------------")
+        print("\n~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("     Manage Product     ")
-        print("------------------------")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("1. Add Product")
         print("2. Edit Product")
         print("3. Delete Product")
         print("4. Restore Deleted Product")
-        print("0. Back to Main Menu")
+        print("\n0. Back to Main Menu")
         choice = input("\nSelect option: ")
 
         if choice == "1":
@@ -1301,8 +1302,7 @@ def manage_product():
             status = "active"
             data.append([new_id, category_id, name, price, stock, description, status])
             save_data(file, data, delimiter="|")
-            print("Product added.")
-            input("Press Enter to continue...")
+            input("\033[96mProduct added.Press Enter to continue...\033[0m")
 
         elif choice == "2":
             clear_screen()
@@ -1338,15 +1338,15 @@ def manage_product():
                     elif sub_choice == "5":
                         row[5] = input(f"Enter new Description [{row[5]}]: ") or row[5]
                     elif sub_choice == "0":
-                        print("Edit cancelled.")
+                        print("\033[91mEdit cancelled.\033[0m")
                     else:
-                        print("Invalid option.")
+                        print("\033[91mInvalid option.\033[0m")
                     break
             if found:
                 save_data(file, data, delimiter="|")
-                print("Product updated.")
+                print("\033[96mProduct updated.\033[0m")
             else:
-                print("Active product not found.")
+                print("\033[91mActive product not found.\033[0m")
             input("Press Enter to continue...")
 
         elif choice == "3":
@@ -1361,9 +1361,9 @@ def manage_product():
                     break
             if found:
                 save_data(file, data, delimiter="|")
-                print(f"Product ID {del_id} marked as deleted.")
+                print(f"\033[96mProduct ID {del_id} marked as deleted.\033[0m")
             else:
-                print("Active product not found.")
+                print("\033[91mActive product not found.\033[0m")
             input("Press Enter to continue...")
 
         elif choice == "4":
@@ -1378,17 +1378,15 @@ def manage_product():
                     break
             if restored:
                 save_data(file, data, delimiter="|")
-                print("Product restored.")
+                print("\033[96mProduct restored.\033[0m")
             else:
-                print("Deleted product not found.")
+                print("\033[91mDeleted product not found.\033[0m")
             input("Press Enter to continue...")
 
         elif choice == "0":
             break
         else:
-            print("Invalid option.")
-            input("Press Enter to continue...")
-
+            input("\033[91mInvalid option. Press Enter to continue...\033[0m")
 
 def display_product_list(product_data=None, status_filter=None):
     file = "product.txt"
@@ -1429,11 +1427,34 @@ def display_product_list(product_data=None, status_filter=None):
 def display_categories():
     cfile = "category.txt"
     cdata = load_data(cfile)
-    print("\n----------------")
-    print("   Categories   ")
-    print("----------------")
-    for crow in cdata:
-        print(" | ".join(crow))
+
+    if not cdata:
+        print("No categories found.")
+        return
+
+    headers = ["ID", "Name"]
+
+    # 计算每一列的最大宽度（包括标题）
+    col_widths = [
+        max(len(headers[i]), max(len(row[i]) for row in cdata)) for i in range(len(headers))
+    ]
+
+    # 打印标题线
+    print("\n" + "=" * (sum(col_widths) + len(col_widths) * 3 + 1))
+    print("|", end="")
+    for i, header in enumerate(headers):
+        print(f" {header:<{col_widths[i]}} |", end="")
+    print()
+    print("=" * (sum(col_widths) + len(col_widths) * 3 + 1))
+
+    # 打印数据行
+    for row in cdata:
+        print("|", end="")
+        for i, cell in enumerate(row):
+            print(f" {cell:<{col_widths[i]}} |", end="")
+        print()
+    print("=" * (sum(col_widths) + len(col_widths) * 3 + 1))
+
 
 def get_category_name_by_id(category_id):
     cfile = "category.txt"
@@ -1441,7 +1462,7 @@ def get_category_name_by_id(category_id):
     for row in cdata:
         if row[0] == category_id:
             return row[1]
-    return "Unknown"
+    return "Category"
 
 def is_valid_category_id(category_id):
     cdata = load_data("category.txt", delimiter="|")
