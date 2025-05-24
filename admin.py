@@ -43,38 +43,109 @@ def save_data(filename, data, delimiter=","):
 
 def manage_category():
     file = "category.txt"
-    data = load_data(file)
-    while True:
-        clear_screen()
-        print("\n--- Manage Category ---")
-        print("1. View Categories")
-        print("2. Add Category")
-        print("3. Delete Category")
-        print("4. Back to Main Menu")
-        choice = input("Select option: ")
-        if choice == "1":
-            clear_screen()
-            print("\n--- Category List ---")
+
+    def load_data(file):
+        try:
+            with open(file, "r") as f:
+                lines = f.readlines()
+            # Only include valid rows with at least ID and Category Name
+            return [line.strip().split("|") for line in lines if "|" in line and len(line.strip().split("|")) == 2]
+        except FileNotFoundError:
+            return []
+
+    def save_data(file, data):
+        with open(file, "w") as f:
             for row in data:
-                print(" | ".join(row))
-            input("\nPress Enter to continue...")
-        elif choice == "2":
-            name = input("Enter new category name: ")
+                f.write("|".join(row) + "\n")
+
+    data = load_data(file)
+
+    def view_categories():
+        clear_screen()
+        print("-" * 50)
+        print(" " * 18 + "Category List")
+        print("-" * 50)
+        print(f"{'Category ID':<12} | {'Category Name'}")
+        print("-" * 50)
+        for row in data:
+            if len(row) >= 2:
+                print(f"{row[0]:<12} | {row[1]}")
+        print("-" * 50)
+
+    def add_category():
+        nonlocal data
+        name = input("Enter new category name: ").strip()
+        if not name:
+            print("⚠️ Category name cannot be empty.")
+        elif any(row[1].lower() == name.lower() for row in data):
+            print("⚠️ Category already exists.")
+        else:
             new_id = str(int(data[-1][0]) + 1 if data else 1)
             data.append([new_id, name])
             save_data(file, data)
-            print("Category added.")
-            input("Press Enter to continue...")
-        elif choice == "3":
-            del_id = input("Enter ID to delete: ")
+            print("✅ Category added.")
+        input("Press Enter to continue...")
+
+    def edit_category():
+        nonlocal data
+        edit_id = input("Enter ID to edit: ").strip()
+        for row in data:
+            if row[0] == edit_id:
+                print(f"\nCurrent name: {row[1]}")
+                new_name = input("Enter new category name: ").strip()
+                if not new_name:
+                    print("⚠️ Name cannot be empty.")
+                elif any(r[1].lower() == new_name.lower() and r[0] != edit_id for r in data):
+                    print("⚠️ Duplicate category name.")
+                else:
+                    row[1] = new_name
+                    save_data(file, data)
+                    print("✅ Category updated.")
+                break
+        else:
+            print("❌ Category ID not found.")
+        input("Press Enter to continue...")
+
+    def delete_category():
+        nonlocal data
+        del_id = input("Enter ID to delete: ").strip()
+        if any(row[0] == del_id for row in data):
             data = [row for row in data if row[0] != del_id]
             save_data(file, data)
-            print("Category deleted.")
-            input("Press Enter to continue...")
+            print("✅ Category deleted.")
+        else:
+            print("❌ Category ID not found.")
+        input("Press Enter to continue...")
+
+    while True:
+        clear_screen()
+        print("--- Manage Category ---")
+        print("1. View Categories")
+        print("2. Add Category")
+        print("3. Edit Category")
+        print("4. Delete Category")
+        print("0. Back to Main Menu")
+        choice = input("\nSelect option: ").strip()
+
+        if choice == "1":
+            view_categories()
+            input("\nPress Enter to continue...")
+        elif choice == "2":
+            clear_screen()
+            view_categories()
+            add_category()
+        elif choice == "3":
+            clear_screen()
+            view_categories()
+            edit_category()
         elif choice == "4":
+            clear_screen()
+            view_categories()
+            delete_category()
+        elif choice == "0":
             break
         else:
-            print("Invalid option.")
+            print("⚠️ Invalid option.")
             input("Press Enter to continue...")
 
 def manage_product():
