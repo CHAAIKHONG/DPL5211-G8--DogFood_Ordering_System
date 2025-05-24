@@ -1056,10 +1056,11 @@ def feedback():
     input("\033[96mYour FeedBack already saving. Thank you!\033[0m")
     clear_screen()
 
-def profile():
-    global user_id
+def profile(user_id):
     users = load_user_details("profile")  # This loads all users
     user = None
+    print(user_id)
+    print(f"userid = { u['id']}")
     
     # Find the current user
     for u in users:
@@ -1092,7 +1093,9 @@ def profile():
         input("Press Enter to continue...")
 
 def menu():
+    global user_id
     while True:
+        clear_screen()
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("                Welcome to Dog Food Shop                ")
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -1124,7 +1127,7 @@ def menu():
                 # break
             case 5:
                 # print("case 5")
-                profile()
+                profile(user_id)
                 # break
             case 0:
                 print("case 0")
@@ -1132,7 +1135,7 @@ def menu():
             case _:
                 print("\033[91mInvalid input. Please choose between 0-5.\033[0m")
                 input("\nPress Enter to return to the menu...")
-                clear_screen()
+                
 
 # ------------------------------- admin module --------------------------------------------------------------------------
 def show_main_menu(role):
