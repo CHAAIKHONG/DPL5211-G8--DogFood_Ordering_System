@@ -2,6 +2,7 @@ import hashlib
 import os
 from datetime import datetime 
 from collections import defaultdict
+import csv
 
 user_id = None
 
@@ -141,55 +142,6 @@ def save_users(users, filename="users_details.txt"):
         for user in users:  # users is a list, not a dict
             f.write(f"{user['id']}|{user['fullname']}|{user['email']}|{user['address']}|{user['phonenumber']}|{user['password']}\n")
 
-# def register():
-#     clear_screen()
-#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-#     print("                       Register                         ")
-#     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    
-#     fullname = str(input("Enter username         : "))
-#     # Email validation loop
-#     while True:
-#         email = str(input("Enter your email       : "))
-#         if "@" in email and "." in email:
-#             break
-#         else:
-#             print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
-
-#     address = str(input("Enter home address     : "))
-#     while True:
-#         phonenumber = input("Enter phone number     : ").strip()
-#         if phonenumber.isdigit():
-#             break
-#         else:
-#             print("\033[91mInvalid phone number. Please enter number only.\033[0m")
-#     max_attempts = 3
-#     attempts = 0
-
-#     while attempts < max_attempts:
-#         password = str(input("Enter password         : "))
-#         confirmpass = str(input("Enter confirm password : "))
-        
-#         if password == confirmpass:
-#             hashed_password = hashlib.sha256(password.encode()).hexdigest()
-#             users = load_user_details("register")
-#             next_id = users[-1]['id'] + 1 if users else 1
-
-#             with open("users_details.txt", "a") as f:
-#                 f.write(f"{next_id}|{fullname}|{email}|{address}|{phonenumber}|{hashed_password}\n")
-
-#             print("\n\033[96mPassword confirmed! Registration successful.\033[0m")
-#             input("Press Enter to continue...")
-#             return  # Exit the function successfully
-#         else:
-#             attempts += 1
-#             remaining = max_attempts - attempts
-#             if remaining > 0:
-#                 print(f"\033[91mPasswords do not match. You have {remaining} attempt(s) left.\033[0m\n")
-#             else:
-#                 input("\033[91mToo many failed attempts.Press enter to continue....\033[0m")
-#                 return
-
 def register():
     clear_screen()
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -288,26 +240,43 @@ def login():
         if not found:
             # Try staff.txt
             users = load_admin_details("login")
-            for user in users:
-                if email == user['email'] and hidden_password == user['password']:
-                    found = True
-                    clear_screen()
-                    print("╔" + "═" * 50 + "╗")
-                    print("║" + " " * 50 + "║")
+            if email == "manager@gmail.com" and password == "manager@123":
+                found = True
+                clear_screen()
+                print("╔" + "═" * 50 + "╗")
+                print("║" + " " * 50 + "║")
 
-                    welcome_msg = f"Welcome, {user['fullname']} satff!"
-                    centered_msg = welcome_msg.center(50)
-                    print(f"║{centered_msg}║")
+                welcome_msg = f"Welcome, Manager!"
+                centered_msg = welcome_msg.center(50)
+                print(f"║{centered_msg}║")
 
-                    print("║" + " " * 50 + "║")
-                    print("╚" + "═" * 50 + "╝")
-                    input("\nPress Enter to continue...")
-                    clear_screen()
-                    user_id = user['id']
-                    menu() # when admin part add in this file than menu() change to admin_menu()
-                    return  # Exit function if login successful
-                    break
+                print("║" + " " * 50 + "║")
+                print("╚" + "═" * 50 + "╝")
+                input("\nPress Enter to continue...")
+                clear_screen()
+                user_id = "S1"
+                admin_dashboard("superadmin") # when admin part add in this file than menu() change to admin_menu()
+                return  # Exit function if login successful
+            else :
+                for user in users:
+                    if email == user['email'] and hidden_password == user['password']:
+                        found = True
+                        clear_screen()
+                        print("╔" + "═" * 50 + "╗")
+                        print("║" + " " * 50 + "║")
 
+                        welcome_msg = f"Welcome, {user['fullname']} staff!"
+                        centered_msg = welcome_msg.center(50)
+                        print(f"║{centered_msg}║")
+
+                        print("║" + " " * 50 + "║")
+                        print("╚" + "═" * 50 + "╝")
+                        input("\nPress Enter to continue...")
+                        clear_screen()
+                        user_id = user['id']
+                        admin_dashboard("admin") # when admin part add in this file than menu() change to admin_menu()
+                        return  # Exit function if login successful
+                    
         # If login fails
         attempts += 1
         remaining = max_attempts - attempts
@@ -1165,6 +1134,438 @@ def menu():
                 input("\nPress Enter to return to the menu...")
                 clear_screen()
 
+# ------------------------------- admin module --------------------------------------------------------------------------
+def show_main_menu(role):
+    clear_screen()
+    print("\n=== Admin Dashboard ===")
+    print("1. Manage Category")
+    print("2. Manage Product")
+    print("3. Manage Order")
+    print("4. Manage Feedback")
+    print("5. Report")
+    if role == "superadmin":
+        print("6. Manage Staff Account")
+        print("7. Profile")
+    else:
+        print("6. Profile")
+    print("0. Logout")
+
+def load_data(filename, delimiter="|"):
+    if not os.path.exists(filename):
+        return []
+    with open(filename, "r") as file:
+        reader = csv.reader(file, delimiter=delimiter)
+        return list(reader)
+
+def save_data(filename, data, delimiter="|"):
+    with open(filename, "w", newline='') as file:
+        writer = csv.writer(file, delimiter=delimiter)
+        writer.writerows(data)
+# manage category
+def manage_category():
+    file = "category.txt"
+    data = load_data(file)
+    while True:
+        clear_screen()
+        print("\n--- Manage Category ---")
+        print("1. View Categories")
+        print("2. Add Category")
+        print("3. Delete Category")
+        print("4. Back to Main Menu")
+        choice = input("Select option: ")
+        if choice == "1":
+            clear_screen()
+            print("\n--- Category List ---")
+            for row in data:
+                print(" | ".join(row))
+            input("\nPress Enter to continue...")
+        elif choice == "2":
+            name = input("Enter new category name: ")
+            new_id = str(int(data[-1][0]) + 1) if data else "1"
+            data.append([new_id, name])
+            save_data(file, data)
+            print("Category added.")
+            input("Press Enter to continue...")
+        elif choice == "3":
+            clear_screen()
+            for row in data:
+                print(" | ".join(row))
+            del_id = input("Enter ID to delete: ")
+            data = [row for row in data if row[0] != del_id]
+            save_data(file, data)
+            print("Category deleted.")
+            input("Press Enter to continue...")
+        elif choice == "4":
+            break
+        else:
+            print("Invalid option.")
+            input("Press Enter to continue...")
+# manage product
+def manage_product():
+    clear_screen()
+    print("[TODO: Implement file-based product management]\n")
+    input("Press Enter to return...")
+# manage order
+def manage_order():
+    clear_screen()
+    print("[TODO: Implement file-based order management]\n")
+    input("Press Enter to return...")
+# show feedback
+def manage_feedback():
+    clear_screen()
+    file = "feedback.txt"
+    data = load_data(file)
+    print("\n--- Feedback Entries ---")
+    for row in data:
+        print(" | ".join(row))
+    input("\nPress Enter to return...")
+# generate report
+def generate_daily_report(date_str):
+    clear_screen()
+    history = load_order_history()
+    try:
+        target_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        filtered = []
+        for order in history:
+            dt = datetime.strptime(order['timestamp'], "%Y-%m-%d %H:%M:%S").date()
+            if dt == target_date:
+                filtered.append(order)
+        print(f"\n📅 Daily Report for {date_str}")
+        print(f"{'Time':<20} | {'Product Name':<35} | {'Qty':>5} | {'Total (RM)':>10}")
+        print("-" * 80)
+        total = 0
+        for o in filtered:
+            print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
+            total += o['total_price']
+        print(f"\n💰 Total Revenue: RM{total:.2f}")
+    except ValueError:
+        print("❌ Invalid date format. Use YYYY-MM-DD.")
+
+    input("\nPress Enter to return...")
+
+def generate_monthly_report(month_str):
+    clear_screen()
+    history = load_order_history()
+    try:
+        target_month = datetime.strptime(month_str, "%Y-%m")
+        filtered = []
+        for order in history:
+            dt = datetime.strptime(order['timestamp'], "%Y-%m-%d %H:%M:%S")
+            if dt.year == target_month.year and dt.month == target_month.month:
+                filtered.append(order)
+        print(f"\n📅 Monthly Report for {month_str}")
+        print(f"{'Time':<20} | {'Product Name':<35} | {'Qty':>5} | {'Total (RM)':>10}")
+        print("-" * 80)
+        total = 0
+        for o in filtered:
+            print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
+            total += o['total_price']
+        print(f"\n💰 Total Revenue: RM{total:.2f}")
+    except ValueError:
+        print("❌ Invalid month format. Use YYYY-MM.")
+
+    input("\nPress Enter to return...")
+
+def generate_annual_report(year_str):
+    clear_screen()
+    history = load_order_history()
+    try:
+        target_year = int(year_str)
+        filtered = []
+        for order in history:
+            dt = datetime.strptime(order['timestamp'], "%Y-%m-%d %H:%M:%S")
+            if dt.year == target_year:
+                filtered.append(order)
+        print(f"\n📅 Annual Report for {year_str}")
+        print(f"{'Time':<20} | {'Product Name':<35} | {'Qty':>5} | {'Total (RM)':>10}")
+        print("-" * 80)
+        total = 0
+        for o in filtered:
+            print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
+            total += o['total_price']
+        print(f"\n💰 Total Revenue: RM{total:.2f}")
+    except ValueError:
+        print("❌ Invalid year format. Use YYYY.")
+
+    input("\nPress Enter to return...")
+
+def show_report_menu():
+    while True:
+        clear_screen()
+        print("\n--- Report Management ---")
+        print("1. Daily Report")
+        print("2. Monthly Report")
+        print("3. Annual Report")
+        print("0. Back")
+        choice = input("Select report type: ")
+
+        if choice == "1":
+            while True:
+                clear_screen()
+                print("\n--- Daily Report ---")
+                print("1. Search by date")
+                print("2. Today's report")
+                print("0. Back")
+                sub_choice = input("Select option: ")
+                if sub_choice == "1":
+                    date_str = input("Enter date (YYYY-MM-DD): ")
+                    generate_daily_report(date_str)
+                    break
+                elif sub_choice == "2":
+                    today_str = datetime.today().strftime('%Y-%m-%d')
+                    generate_daily_report(today_str)
+                    break
+                elif sub_choice == "0":
+                    break
+                else:
+                    input("\033[91mInvalid Daily Report option. Please press Enter to try again.\033[0m")
+
+        elif choice == "2":
+            while True:
+                clear_screen()
+                print("\n--- Monthly Report ---")
+                print("1. Search by month")
+                print("2. This month's report")
+                print("0. Back")
+                sub_choice = input("Select option: ")
+                if sub_choice == "1":
+                    month_str = input("Enter month (YYYY-MM): ")
+                    generate_monthly_report(month_str)
+                    break
+                elif sub_choice == "2":
+                    month_str = datetime.today().strftime('%Y-%m')
+                    generate_monthly_report(month_str)
+                    break
+                elif sub_choice == "0":
+                    break
+                else:
+                    input("\033[91mInvalid Monthly Report option. Please press Enter to try again.\033[0m")
+
+        elif choice == "3":
+            while True:
+                clear_screen()
+                print("\n--- Annual Report ---")
+                print("1. Search by year")
+                print("2. This year's report")
+                print("0. Back")
+                sub_choice = input("Select option: ")
+                if sub_choice == "1":
+                    year_str = input("Enter year (YYYY): ")
+                    generate_annual_report(year_str)
+                    break
+                elif sub_choice == "2":
+                    year_str = datetime.today().strftime('%Y')
+                    generate_annual_report(year_str)
+                    break
+                elif sub_choice == "0":
+                    break
+                else:
+                    input("\033[91mInvalid Annual Report option. Please press Enter to try again.\033[0m")
+
+        elif choice == "0":
+            admin_dashboard("superadmin")
+            break
+        else:
+            input("\033[91mInvalid Report Type or option. Please press Enter to try again.\033[0m")
+# manage staff account
+def show_staff():
+    clear_screen()
+    staff_list = load_admin_details("profile")  # 可用 profile/login/register 都行
+    print("ID | Name | Email | Address | Phone")
+    print("-" * 50)
+    for staff in staff_list:
+        print(f"{staff['id']} | {staff['fullname']} | {staff['email']} | {staff['address']} | {staff['phonenumber']}")
+
+def add_staff():
+    clear_screen()
+    staff_list = load_admin_details("register")
+    new_id = max([staff["id"] for staff in staff_list], default=0) + 1
+
+    fullname = input("Enter full name: ")
+    email = input("Enter email: ")
+    address = input("Enter address: ")
+    phoneno = input("Enter phone number: ")
+    password = input("Enter password: ")
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+    new_line = f"{new_id}|{fullname}|{email}|{address}|{phoneno}|{hashed_password}"
+    
+    with open("staff.txt", "a", encoding="utf-8") as f:
+        f.write(new_line + "\n")
+
+    print("Staff added successfully.")
+    input("Press Enter to return...")
+
+def delete_staff():
+    clear_screen()
+    staff_list = load_admin_details("profile")
+    show_staff()
+    delete_id = input("\nEnter the ID of the staff to delete: ")
+
+    try:
+        delete_id = int(delete_id)
+    except ValueError:
+        print("Invalid ID format.")
+        input("Press Enter to return...")
+        return
+
+    new_list = [staff for staff in staff_list if staff["id"] != delete_id]
+
+    if len(new_list) == len(staff_list):
+        print("Staff ID not found.")
+    else:
+        # 重新写入文件
+        with open("staff.txt", "w", encoding="utf-8") as f:
+            for staff in new_list:
+                line = f'{staff["id"]}|{staff["fullname"]}|{staff["email"]}|{staff["address"]}|{staff["phonenumber"]}|{staff["password"]}'
+                f.write(line + "\n")
+        print("Staff deleted successfully.")
+    input("Press Enter to return...")
+
+def manage_staff_account():
+    while True:
+        clear_screen()
+        print("=== Manage Staff Account ===")
+        print("1. Show staff")
+        print("2. Add staff")
+        print("3. Delete staff")
+        print("0. Return")
+        choice = input("Enter choice: ")
+
+        if choice == "1":
+            show_staff()
+            input("\nPress Enter to return...")
+        elif choice == "2":
+            add_staff()
+        elif choice == "3":
+            delete_staff()
+        elif choice == "0":
+            break
+        else:
+            input("Invalid choice. Press Enter to try again...")
+# manage profile
+# def profile():
+#     clear_screen()
+#     print("[TODO: Implement user profile view/edit]\n")
+#     input("Press Enter to return...")
+def show_profile(user_id):
+    admin_details = load_admin_details("profile")
+    for staff in admin_details:
+        if staff["id"] == user_id:
+            print(f"\n--- Profile Info ---")
+            print(f"Name    : {staff['fullname']}")
+            print(f"Email   : {staff['email']}")
+            print(f"Address : {staff['address']}")
+            print(f"Phone   : {staff['phonenumber']}")
+            return
+    print("User not found.")
+
+def edit_profile(user_id):
+    admin_details = load_admin_details("profile")
+    found = False
+
+    for staff in admin_details:
+        if staff["id"] == user_id:
+            found = True
+            while True:
+                clear_screen()
+                print("=== Edit Profile ===")
+                print("1. Name")
+                print("2. Email")
+                print("3. Address")
+                print("4. Phone Number")
+                print("5. Password")
+                print("0. Save and Return")
+                choice = input("Enter your choice: ")
+
+                if choice == "1":
+                    staff['fullname'] = input(f"New Name [{staff['fullname']}]: ") or staff['fullname']
+                elif choice == "2":
+                    staff['email'] = input(f"New Email [{staff['email']}]: ") or staff['email']
+                elif choice == "3":
+                    staff['address'] = input(f"New Address [{staff['address']}]: ") or staff['address']
+                elif choice == "4":
+                    staff['phonenumber'] = input(f"New Phone Number [{staff['phonenumber']}]: ") or staff['phonenumber']
+                elif choice == "5":
+                    new_password = input("Enter New Password: ")
+                    confirm_password = input("Confirm Password: ")
+                    if new_password == confirm_password:
+                        staff['password'] = hashlib.sha256(new_password.encode()).hexdigest()
+                        print("Password updated successfully.")
+                    else:
+                        print("Passwords do not match.")
+                        input("Press Enter to continue...")
+                elif choice == "0":
+                    break
+                else:
+                    print("Invalid choice.")
+                    input("Press Enter to continue...")
+
+            break  # done editing
+
+    if found:
+        # 保存更改到 staff.txt
+        with open("staff.txt", "w", encoding="utf-8") as f:
+            for staff in admin_details:
+                line = f"{staff['id']}|{staff['fullname']}|{staff['email']}|{staff['address']}|{staff['phonenumber']}|{staff['password']}\n"
+                f.write(line)
+        print("\nProfile updated successfully.")
+    else:
+        print("User not found.")
+
+def profile(user_id):
+    while True:
+        clear_screen()
+        print("=== Profile Menu ===")
+        print("1. Show Profile")
+        print("2. Edit Profile")
+        print("0. Back")
+        choice = input("Enter choice: ")
+        
+        if choice == "1":
+            clear_screen()
+            show_profile(user_id)
+            input("\nPress Enter to return...")
+        elif choice == "2":
+            clear_screen()
+            edit_profile(user_id)
+            input("\nPress Enter to return...")
+        elif choice == "0":
+            break
+        else:
+            print("Invalid choice.")
+            input("Press Enter to continue...")
+
+# admin dashboard
+def admin_dashboard(role):
+    global user_id
+    while True:
+        show_main_menu(role)
+        choice = input("Select an option: ")
+        if choice == "1":
+            manage_category()
+        elif choice == "2":
+            manage_product()
+        elif choice == "3":
+            manage_order()
+        elif choice == "4":
+            manage_feedback()
+        elif choice == "5":
+            show_report_menu()
+        elif choice == "6":
+            if role == "admin":
+                profile(user_id)
+            else:
+                manage_staff_account()
+        elif choice == "7" and role == "superadmin":
+            profile(user_id)
+        elif choice == "0":
+            print("Logging out...\n")
+            break
+        else:
+            input("\033[91mInvalid choice. Please select a valid option. Press Enter to continue...\033[0m")
+
 while True:
     clear_screen()
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -1173,15 +1574,15 @@ while True:
     print("1. Login")
     print("2. Register")
     print("\n0. Exit")
-    first_choose = int(input("Please Enter your choice : "))
+    first_choose = input("Please Enter your choice : ")
 
-    if first_choose == 1:
+    if first_choose == "1":
         login()
         # break
-    elif first_choose == 2:
+    elif first_choose == "2":
         register()
         # break
-    elif first_choose == 0:
+    elif first_choose == "0":
         exit()
     else:
         input("\033[91m\nInvalid input.Press Enter to try again...\033[0m")
