@@ -1145,7 +1145,6 @@ def show_main_menu(role):
     print("5. Report")
     if role == "superadmin":
         print("6. Manage Staff Account")
-        print("7. Profile")
     else:
         print("6. Profile")
     print("0. Logout")
@@ -1881,11 +1880,7 @@ def manage_staff_account():
             break
         else:
             input("Invalid choice. Press Enter to try again...")
-# manage profile
-# def profile():
-#     clear_screen()
-#     print("[TODO: Implement user profile view/edit]\n")
-#     input("Press Enter to return...")
+
 def show_profile(user_id):
     admin_details = load_admin_details("profile")
     for staff in admin_details:
@@ -1995,8 +1990,6 @@ def admin_dashboard(role):
                 profile(user_id)
             else:
                 manage_staff_account()
-        elif choice == "7" and role == "superadmin":
-            profile(user_id)
         elif choice == "0":
             print("Logging out...\n")
             break
