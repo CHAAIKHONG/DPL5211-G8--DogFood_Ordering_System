@@ -122,6 +122,7 @@ def load_order_history(filename="orderhistory.txt"):
                     # Extract payment info if available
                     payment_method = parts[6] if len(parts) > 6 else "Unknown"
                     payment_details = parts[7] if len(parts) > 7 else "N/A"
+                    status = parts[8] if len(parts) > 8 else "Pending"  # Default status
                     
                     history.append({
                         'timestamp': timestamp.strip(),
@@ -131,15 +132,67 @@ def load_order_history(filename="orderhistory.txt"):
                         'unit_price': float(unit_price),
                         'total_price': float(total_price),
                         'payment_method': payment_method.strip(),
-                        'payment_details': payment_details.strip()
+                        'payment_details': payment_details.strip(),
+                        'status': status.strip()  # Add status field
                     })
                 except ValueError as e:
                     print(f"[❌ Line {line_num}] Error converting values: {e}")
     return history
 
+def view_order_status(user_id):
+    """Display order status for the current user"""
+    history = load_order_history()
+    user_history = [item for item in history if item['user_id'] == str(user_id)]
+    
+    if not user_history:
+        print("\033[91mNo order history found.\033[0m")
+        input("Press Enter to return to main menu...")
+        return
+    
+    # Group orders by timestamp (assuming same timestamp = same order)
+    grouped_orders = defaultdict(list)
+    for item in user_history:
+        grouped_orders[item['timestamp']].append(item)
+    
+    clear_screen()
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("                     Order Status                       ")
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    
+    for timestamp in sorted(grouped_orders.keys(), reverse=True):
+        order_group = grouped_orders[timestamp]
+        first_item = order_group[0]
+        
+        print(f"\n🕒 Order Time: {timestamp}")
+        print(f"Payment Method: {first_item['payment_method']}")
+        status = first_item['status']
+        if status == "Completed":
+            print(f"Status: \033[96m{status}\033[0m")
+        elif status == "Pending":
+            print(f"Status: \033[93m{status}\033[0m") 
+        elif status == "Delivery":
+            print(f"Status: \033[94m{status}\033[0m")
+        else:
+            print(f"Status: {status}")
+
+        if first_item['payment_method'] == "Visa":
+            print(f"Payment Details: {first_item['payment_details']}")
+            
+        print(f"\n{'No':<4} {'|Product':<37} {'|Quantity':<12} {'|Unit Price':<15} {'|Total':<10}")
+        print("=====+=====================================+============+===============+==============")
+        group_total = 0
+        for idx, item in enumerate(order_group, 1):
+            print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<12.2f} | ${item['total_price']:<9.2f}")
+            group_total += item['total_price']
+        print(f"\033[33m{'':<52} Subtotal: ${group_total:.2f}\033[0m")
+
+    print("\nNote: Status can be Pending, Delivery, Completed, or Cancelled")
+    input("\nPress Enter to return to main menu...")
+    clear_screen()
+
 def save_users(users, filename="users_details.txt"):
     with open(filename, "w", encoding="utf-8") as f:
-        for user in users:  # users is a list, not a dict
+        for user in users:
             f.write(f"{user['id']}|{user['fullname']}|{user['email']}|{user['address']}|{user['phonenumber']}|{user['password']}\n")
 
 def register():
@@ -150,21 +203,19 @@ def register():
     
     fullname = str(input("Enter username         : "))
     
-    users = load_user_details("register")  # 预加载一次现有用户
+    users = load_user_details("register")  
     
-    # Email validation loop + duplicate checking
     while True:
         email = str(input("Enter your email       : "))
         if "@" not in email or "." not in email:
             print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
             continue
         
-        # 检查 email 是否已存在
         email_exists = any(user['email'] == email for user in users)
         if email_exists:
             print("\033[91mThis email is already registered. Please use a different email.\033[0m\n")
         else:
-            break  # 通过格式和重复检查
+            break  
     
     address = str(input("Enter home address     : "))
     while True:
@@ -234,11 +285,10 @@ def login():
                 clear_screen()
                 user_id = user['id']
                 menu()
-                return  # Exit function if login successful
+                return  
                 break
 
         if not found:
-            # Try staff.txt
             users = load_admin_details("login")
             if email == "manager@gmail.com" and password == "manager@123":
                 found = True
@@ -255,8 +305,8 @@ def login():
                 input("\nPress Enter to continue...")
                 clear_screen()
                 user_id = "S1"
-                admin_dashboard("superadmin") # when admin part add in this file than menu() change to admin_menu()
-                return  # Exit function if login successful
+                admin_dashboard("superadmin") 
+                return  
             else :
                 for user in users:
                     if email == user['email'] and hidden_password == user['password']:
@@ -274,10 +324,9 @@ def login():
                         input("\nPress Enter to continue...")
                         clear_screen()
                         user_id = user['id']
-                        admin_dashboard("admin") # when admin part add in this file than menu() change to admin_menu()
-                        return  # Exit function if login successful
+                        admin_dashboard("admin") 
+                        return  
                     
-        # If login fails
         attempts += 1
         remaining = max_attempts - attempts
         if remaining > 0:
@@ -302,7 +351,6 @@ def show_categories(categories):
 
 def show_product_detail(product):
     clear_screen()
-    # print(f"Product ID  : {product['product_id']}")
     print(f"Name        : {product['product_name']}")
     print(f"Price       : ${product['price']}")
     print(f"Stock       : {product['stock']}")
@@ -336,7 +384,6 @@ def add_to_cart(user_id, product, products, product_file):
     with open('user_shoppingcart.txt', 'a', encoding='utf-8') as f:
         f.write(f"{user_id}|{product['product_name']}|{quantity}|{product['price']}|{total_price:.2f}\n")
 
-    # 更新库存
     product['stock'] = str(int(product['stock']) - quantity)
     save_products(products, product_file)
     print("\033[96mProduct added to cart!\033[0m")
@@ -347,7 +394,6 @@ def show_products_by_category(products, category_id, category_name):
     print(f"Products in Category {category_name}:")
     print("~" * 40)
     
-    # Filter products by category
     category_products = [p for p in products if p['category_id'] == category_id]
     
     if not category_products:
@@ -355,7 +401,6 @@ def show_products_by_category(products, category_id, category_name):
         print("\n0. Go back main menu")
         return None, None
     
-    # Add sorting options with input validation
     while True:
         clear_screen()
         print(f"Products in Category {category_name}:")
@@ -370,7 +415,6 @@ def show_products_by_category(products, category_id, category_name):
         sort_choice = input("\nEnter your choice: ").strip()
         
         if sort_choice == "0" or sort_choice == "":
-            # No sorting - maintain original order but keep product_id as reference
             break
         elif sort_choice == "1":
             category_products.sort(key=lambda x: float(x['price']))
@@ -388,12 +432,10 @@ def show_products_by_category(products, category_id, category_name):
             input("\033[91mInvalid choice. Please enter 1-4 or 0 to skip. Press Enter to try again...\033[0m")
             continue
     
-    # Display products with both original product_id and sequential numbering
     clear_screen()
     print(f"Products in Category {category_name}:")
     print("~" * 40)
     
-    # Create a mapping between display numbers and actual products
     numbered_products = list(enumerate(category_products, start=1))
     product_mapping = {str(num): product for num, product in numbered_products}
     
@@ -402,7 +444,6 @@ def show_products_by_category(products, category_id, category_name):
     
     print("\n0. Go back main menu")
     
-    # Return both the numbered products list and the mapping
     return numbered_products, product_mapping
 
 def category():
@@ -416,7 +457,6 @@ def category():
     while True:
         clear_screen()
         show_categories(categories)
-        # Add search option
         print("\nEnter 's' to search products")
         selected_option = input("\nEnter a category ID to view its products or option: ").strip().lower()
         
@@ -424,7 +464,6 @@ def category():
             clear_screen()
             break
         elif selected_option == "s":
-            # Search functionality
             search_term = input("Enter product name to search: ").strip().lower()
             found_products = [p for p in products if search_term in p['product_name'].lower()]
             
@@ -432,11 +471,9 @@ def category():
                 input("\033[91mNo products found. Press Enter to continue...\033[0m")
                 continue
                 
-            # Create a mapping between display numbers and actual products
             numbered_products = list(enumerate(found_products, start=1))
             product_mapping = {str(num): product for num, product in numbered_products}
             
-            # Display search results with sequential numbers
             clear_screen()
             print(f"Search results for '{search_term}':")
             print("~" * 40)
@@ -444,12 +481,10 @@ def category():
                 category_name = categories.get(product['category_id'], "Unknown Category")
                 print(f"{num}. {product['product_name']} (Category: {category_name}) - ${product['price']}")
             
-            # Allow viewing product details from search results
             selected_number = input("\nEnter product number to see details (or 0 to go back): ").strip()
             if selected_number == "0":
                 continue
                 
-            # Get the actual product using the mapping
             product = product_mapping.get(selected_number)
             if product:
                 while True:
@@ -472,14 +507,13 @@ def category():
             
             while True:
                 numbered_products, product_mapping = show_products_by_category(products, selected_option, categories[selected_option])
-                if numbered_products is None:  # No products in category
+                if numbered_products is None: 
                     break
                                     
                 selected_number = input("\nEnter a product number to see details (or 0 to go back): ").strip()
                 if selected_number == "0":
                     break
                                 
-                # Get the actual product using the mapping
                 product = product_mapping.get(selected_number)
                 if product:
                     while True:
@@ -495,7 +529,7 @@ def category():
                             break
                         else:
                             input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
-                    break  # Exit product detail loop
+                    break  
                 else:
                     input("\033[91mInvalid product number. Please press Enter to try again.\033[0m")
         else:
@@ -544,12 +578,10 @@ def view_and_purchase(cart, user_id):
         if choice == '0':
             return cart
         
-        # Calculate selected items and total amount
         if choice == '-1':
             selected_items = user_cart.copy()
         else:
             try:
-                # First validate all input numbers
                 input_numbers = [x.strip() for x in choice.split(',')]
                 invalid_numbers = [num for num in input_numbers if not num.isdigit() or int(num) < 1 or int(num) > len(user_cart)]
                 
@@ -558,7 +590,6 @@ def view_and_purchase(cart, user_id):
                     input("Press Enter to try again...")
                     continue
                 
-                # All numbers are valid, get the items
                 indices = [int(x) for x in input_numbers]
                 selected_items = [user_cart[i-1] for i in indices]
                 
@@ -572,10 +603,8 @@ def view_and_purchase(cart, user_id):
                 input("Press Enter to try again...")
                 continue
         
-        # Calculate total for selected items only
         total_amount = sum(item['total_price'] for item in selected_items)
         
-        # Payment method selection
         while True:
             clear_screen()
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -601,7 +630,6 @@ def view_and_purchase(cart, user_id):
                     print("                         Visa Payment                   ")
                     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                     
-                    # Enhanced Visa card number input with auto-formatting
                     while True:
                         card_number = input("Enter Visa card number (16 digits, starts with 4): ").replace(" ", "").replace("-", "")
                         if not card_number.isdigit():
@@ -615,11 +643,9 @@ def view_and_purchase(cart, user_id):
                             continue
                         break
                     
-                    # Format the card number for display as user types
                     formatted_card = ' '.join([card_number[i:i+4] for i in range(0, 16, 4)])
                     print(f"Formatted card: {formatted_card}")
                     
-                    # Enhanced expiry date validation
                     while True:
                         expiry_date = input("Enter expiry date (MM/YY): ").strip()
                         if len(expiry_date) != 5 or expiry_date[2] != '/':
@@ -632,17 +658,14 @@ def view_and_purchase(cart, user_id):
                             current_year = datetime.now().year % 100
                             current_month = datetime.now().month
                             
-                            # Validate month
                             if month < 1 or month > 12:
                                 print("\033[91mInvalid month. Must be between 01-12.\033[0m")
                                 continue
                             
-                            # Validate year (current year to current year + 5)
                             if year < current_year or year > current_year + 5:
                                 print(f"\033[91mExpiry year must be between {current_year} and {current_year + 5}.\033[0m")
                                 continue
                             
-                            # If current year, check month hasn't passed
                             if year == current_year and month < current_month:
                                 print("\033[91mThis card has already expired.\033[0m")
                                 continue
@@ -651,7 +674,6 @@ def view_and_purchase(cart, user_id):
                         except ValueError:
                             print("\033[91mInvalid date. Use numbers only (e.g. 12/25).\033[0m")
                     
-                    # CVV validation
                     while True:
                         cvv = input("Enter CVV (3 digits): ").strip()
                         if len(cvv) != 3 or not cvv.isdigit():
@@ -668,19 +690,15 @@ def view_and_purchase(cart, user_id):
                 print("\033[91mInvalid choice. Please try again.\033[0m")
                 input("Press Enter to continue...")
         
-        # Generate and display receipt
         order_datetime = datetime.now()
         formatted_datetime = order_datetime.strftime('%Y-%m-%d %H:%M:%S')
         
         try:
-            # Create receipt folder if it doesn't exist
             if not os.path.exists('receipt'):
                 os.makedirs('receipt')
             
-            # Generate a unique filename for the receipt
             receipt_filename = f"receipt/receipt_{user_id}_{order_datetime.strftime('%Y%m%d_%H%M%S')}.txt"
             
-            # Save receipt to file
             with open(receipt_filename, 'w', encoding='utf-8') as f:
                 f.write("============================================================\n")
                 f.write("                      PURCHASE RECEIPT                      \n")
@@ -702,12 +720,10 @@ def view_and_purchase(cart, user_id):
                 f.write("                Thank you for your purchase!                \n")
                 f.write("============================================================\n")
             
-            # Save to order history
-            with open("orderhistory.txt", 'a', encoding='utf-8') as f:
-                for item in selected_items:
-                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{formatted_datetime}|{payment_method}|{payment_details}\n")
+                with open("orderhistory.txt", 'a', encoding='utf-8') as f:
+                    for item in selected_items:
+                        f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{formatted_datetime}|{payment_method}|{payment_details}|Pending\n")
             
-            # Display receipt to user
             clear_screen()
             print("============================================================")
             print("                      PURCHASE RECEIPT                      ")
@@ -728,7 +744,6 @@ def view_and_purchase(cart, user_id):
             print("                Thank you for your purchase!                ")
             print("============================================================")
             
-            # Remove purchased items from cart
             for item in selected_items:
                 cart.remove(item)
             
@@ -771,20 +786,19 @@ def delete_items(cart, user_id):
             if not selected_items:
                 print("\033[91mNo valid items selected.\033[0m")
                 input("Press Enter to try again...")
-                continue  # Go back to top to re-display table
+                continue  
 
             for item in selected_items:
                 cart.remove(item)
 
             print("\033[96mSelected items deleted from cart.\033[0m")
             input("Press Enter to continue...")
-            return cart  # Exit function after successful deletion
+            return cart 
 
         except Exception as e:
             print(f"\033[91mError: {e}\033[0m")
             input("Press Enter to try again...")
-            continue  # Re-display table on error
-
+            continue 
 def view_order_history(history, user_id):
     user_history = [item for item in history if item['user_id'] == str(user_id)]
     if not user_history:
@@ -807,6 +821,7 @@ def view_order_history(history, user_id):
         
         print(f"\n🕒 Order Time: {timestamp}")
         print(f"💳 Payment Method: {first_item['payment_method']}")
+        print(f"📊 Status: {first_item['status']}")  
         if first_item['payment_method'] == "Visa":
             print(f"🔒 Payment Details: {first_item['payment_details']}")
             
@@ -1099,8 +1114,9 @@ def menu():
         print("1. Product List")
         print("2. Shopping Cart")
         print("3. Purchase History")
-        print("4. FeedBack")
-        print("5. Profile")
+        print("4. Order Status")
+        print("5. FeedBack")
+        print("6. Profile")
         print("0. Logout")
 
         menu_choose = int(input("\nEnter number of module you need to continue : "))
@@ -1118,19 +1134,16 @@ def menu():
                 # print("case 3")
                 orderhistory()
                 # break
-            case 4:
-                # print("case 4")
-                feedback()
-                # break
+            case 4:  # New case for order status
+                view_order_status(user_id)
             case 5:
-                # print("case 5")
+                feedback()
+            case 6:
                 profile()
-                # break
             case 0:
-                print("case 0")
                 break
             case _:
-                print("\033[91mInvalid input. Please choose between 0-5.\033[0m")
+                print("\033[91mInvalid input. Please choose between 0-6.\033[0m")
                 input("\nPress Enter to return to the menu...")
                 clear_screen()
 
