@@ -469,12 +469,61 @@ def display_orders(orders, title="", show_footer=True, pause=True):
         input("\nPress Enter to return...")
   
 def manage_feedback():
+    def clear_screen():
+        print("\n" * 100)  # basic screen clear
+
+    def load_data(file):
+        try:
+            with open(file, "r") as f:
+                lines = f.readlines()
+            return [line.strip().split("|") for line in lines]
+        except FileNotFoundError:
+            return []
+
+    def save_reply(feedback_id, reply):
+        with open("feedback_replies.txt", "a") as f:
+            f.write(f"{feedback_id}|{reply}\n")
+
+    def display_feedback(data):
+        print("\n--- Feedback Entries ---")
+        print("ID | Category | Message")
+        print("-" * 40)
+        for row in data:
+            print(" | ".join(row))
+
     clear_screen()
     file = "feedback.txt"
     data = load_data(file)
-    print("\n--- Feedback Entries ---")
-    for row in data:
-        print(" | ".join(row))
+
+    if not data:
+        print("No feedback found.")
+        input("\nPress Enter to return...")
+        return
+
+    display_feedback(data)
+
+    while True:
+        print("\nOptions:")
+        print("1. Reply to Feedback")
+        print("2. Return to Main Menu")
+        choice = input("Enter your choice: ")
+
+        if choice == "1":
+            feedback_id = input("Enter Feedback ID to reply: ").strip()
+            matched = [row for row in data if row[0] == feedback_id]
+
+            if matched:
+                print(f"\nOriginal Feedback: {' | '.join(matched[0])}")
+                reply = input("Enter your reply: ")
+                save_reply(feedback_id, reply)
+                print("Reply saved successfully.")
+            else:
+                print("Invalid Feedback ID.")
+        elif choice == "2":
+            break
+        else:
+            print("Invalid option. Try again.")
+
     input("\nPress Enter to return...")
 
 def show_report_menu():

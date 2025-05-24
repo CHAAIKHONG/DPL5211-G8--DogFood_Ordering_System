@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 1|1|Homemade Chicken & Rice Bowl|9|15.00|135.00|2025-05-21 17:01:46|Cash on Delivery|N/A|Delivered
 2|1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-21 17:02:35|Visa|Card: ****-****-****-1111, Exp: 02/22|Delivered
 3|1|Beef & Sweet Potato Stew|9|16.00|144.00|2025-05-21 17:27:30|Visa|Card: ****-****-****-1111, Exp: 03/25|Delivered
@@ -17,3 +18,25 @@
 17|1|Homemade Chicken & Rice Bowl|4|15.00|60.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Pending
 18|1|Orijen Original Dry Dog Food|4|55.00|220.00|2025-05-23 15:50:03|Cash on Delivery|N/A|Pending
 19|1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-23 15:50:03|Cash on Delivery|N/A|Pending
+=======
+1|Homemade Chicken & Rice Bowl|9|15.0|135.0|2025-05-21 17:01:46|Cash on Delivery|N/A|Completed
+1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-21 17:02:35|Visa|Card: ****-****-****-1111, Exp: 02/22|Completed
+1|Beef & Sweet Potato Stew|9|16.0|144.0|2025-05-21 17:27:30|Visa|Card: ****-****-****-1111, Exp: 03/25|Completed
+1|Primal Raw Frozen Chicken Nuggets|4|35.0|140.0|2025-05-21 17:27:30|Visa|Card: ****-****-****-1111, Exp: 03/25|Completed
+1|Instinct Freeze-Dried Raw Meals|2|50.0|100.0|2025-05-21 17:27:57|Cash on Delivery|N/A|Completed
+1|Instinct Freeze-Dried Raw Meals|1|50.0|50.0|2025-05-21 17:45:59|Cash on Delivery|N/A|Completed
+1|Primal Raw Frozen Chicken Nuggets|4|35.0|140.0|2025-05-21 17:46:45|Visa|Card: ****-****-****-3021, Exp: 23/23|Completed
+1|Acana Puppy Small Breed|2|45.99|91.98|2025-05-21 17:55:44|Visa|Card: ****-****-****-3456, Exp: 05/25|Completed
+1|Cesar Wet Dog Food Beef|33|2.5|82.5|2025-05-21 17:55:44|Visa|Card: ****-****-****-3456, Exp: 05/25|Completed
+1|Acana Puppy Small Breed|2|45.99|91.98|2025-05-21 18:06:10|Visa|Card: ****-****-****-6574, Exp: 12/26|Completed
+1|Primal Raw Frozen Chicken Nuggets|23|35.0|805.0|2025-05-21 18:06:10|Visa|Card: ****-****-****-6574, Exp: 12/26|Completed
+1|Primal Raw Frozen Chicken Nuggets|1|35.0|35.0|2025-05-21 18:51:11|Cash on Delivery|N/A|Completed
+1|Primal Raw Frozen Chicken Nuggets|1|35.0|35.0|2025-05-21 18:55:46|Cash on Delivery|N/A|Completed
+1|Acana Puppy Small Breed|1|45.99|45.99|2025-05-21 18:55:46|Cash on Delivery|N/A|Completed
+1|Open Farm Freeze-Dried Raw|3|48.99|146.97|2025-05-23 15:25:27|Cash on Delivery|N/A|Completed
+1|Beef & Sweet Potato Stew|12|16.0|192.0|2025-05-23 15:43:28|Cash on Delivery|N/A|Completed
+1|Homemade Chicken & Rice Bowl|4|15.0|60.0|2025-05-23 15:43:28|Cash on Delivery|N/A|Completed
+1|Orijen Original Dry Dog Food|4|55.0|220.0|2025-05-23 15:50:03|Cash on Delivery|N/A|Completed
+1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-23 15:50:03|Cash on Delivery|N/A|Completed
+1|Beef & Sweet Potato Stew|6|16.0|96.0|2025-05-24 17:37:43|Cash on Delivery|N/A|Pending
+>>>>>>> 8fa46da6c72785b6dbbbb080157ee731592e5bb0
