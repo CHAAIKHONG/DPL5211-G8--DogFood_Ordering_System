@@ -13,9 +13,9 @@
 1|Primal Raw Frozen Chicken Nuggets|1|35.00|35.00|2025-05-21 18:55:46|Cash on Delivery|N/A|Completed
 1|Acana Puppy Small Breed|1|45.99|45.99|2025-05-21 18:55:46|Cash on Delivery|N/A|Completed
 1|Open Farm Freeze-Dried Raw|3|48.99|146.97|2025-05-23 15:25:27|Cash on Delivery|N/A|Completed
-1|Beef & Sweet Potato Stew|12|16.00|192.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Completed
-1|Homemade Chicken & Rice Bowl|4|15.00|60.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Completed
-1|Orijen Original Dry Dog Food|4|55.00|220.00|2025-05-23 15:50:03|Cash on Delivery|N/A|Completed
-1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-23 15:50:03|Cash on Delivery|N/A|Completed
-1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-24 17:37:43|Cash on Delivery|N/A|Completed
-1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-25 12:03:04|Cash on Delivery|N/A|Delivery
+1|Beef & Sweet Potato Stew|12|16.00|192.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Delivery
+1|Homemade Chicken & Rice Bowl|4|15.00|60.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Delivery
+1|Orijen Original Dry Dog Food|4|55.00|220.00|2025-05-23 15:50:03|Cash on Delivery|N/A|Delivery
+1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-23 15:50:03|Cash on Delivery|N/A|Pending
+1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-24 17:37:43|Cash on Delivery|N/A|Pending
+1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-25 12:03:04|Cash on Delivery|N/A|Pending
