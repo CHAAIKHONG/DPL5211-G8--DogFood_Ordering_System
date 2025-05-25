@@ -298,7 +298,7 @@ def show_categories(categories):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     for category_id, category_name in categories.items():
         print(f"{category_id}. {category_name}")
-    print("\n0. Go Back Menu")
+    print("\n0. Go Back main menu")
 
 def show_product_detail(product):
     clear_screen()
@@ -538,7 +538,7 @@ def view_and_purchase(cart, user_id):
         for idx, item in enumerate(user_cart, 1):
             print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<11} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
         
-        print("\n0. Go back to main menu")
+        print("\n0. Go back main menu")
         choice = input("\nEnter the numbers of items to purchase (e.g. 1,2 or -1 for all): ").strip()
 
         if choice == '0':
@@ -755,7 +755,7 @@ def delete_items(cart, user_id):
         for idx, item in enumerate(user_cart, 1):
             print(f"{idx:<4} | {item['product_name']:<35} | {item['quantity']:<10} | ${item['unit_price']:<11.2f} | ${item['total_price']:<9.2f}")
 
-        print("\n0. Go back to main menu")
+        print("\n0. Go back main menu")
 
         try:
             choice = input("\nEnter the numbers of items to delete (e.g. 1,2): ").strip()
@@ -1249,7 +1249,7 @@ def manage_category():
         print("2. Add Category")
         print("3. Edit Category")
         print("4. Delete Category")
-        print("\n0. Back to Main Menu")
+        print("\n0. Go back Main Menu")
         choice = input("\nSelect option: ").strip()
 
         if choice == "1":
@@ -1286,7 +1286,7 @@ def manage_product():
         print("2. Edit Product")
         print("3. Delete Product")
         print("4. Restore Deleted Product")
-        print("\n0. Back to Main Menu")
+        print("\n0. Go back Main Menu")
         choice = input("\nSelect option: ")
 
         if choice == "1":
@@ -1496,13 +1496,13 @@ def manage_order():
 
     while True:
         clear_screen()
-        print("--- Order Management ---")
+        print("========== Order Management =========")
+        print("=====================================")
         print("1. View all orders")
         print("2. Filter by payment method")
-        # print("3. Filter by Customer ID")
         print("3. Filter by Delivery Status")
         print("4. Update Delivery Status")
-        print("0. Return to main menu")
+        print("\n0. Go back main menu")
         choice = input("\nSelect an option: ")
 
         if choice == "1":
@@ -1515,7 +1515,7 @@ def manage_order():
             print("1. Visa")
             print("2. Cash on Delivery")
             while True:
-                method_choice = input("Select method (or Enter for all): ")
+                method_choice = input("Please enter your choice:  ")
 
                 method = ""
                 if method_choice == "1":
@@ -1537,29 +1537,27 @@ def manage_order():
             clear_screen()
             display_orders(filtered, title)
 
-        # elif choice == "3":
-        #     cid = input("Enter Customer ID to filter: ")
-        #     filtered = [o for o in orders if o['CustomerID'] == cid]
-        #     clear_screen()
-        #     title = f"Orders for Customer ID {cid}"
-        #     display_orders(filtered, title)
-
         elif choice == "3":
+            clear_screen()
             print("Filter Status:")
             print("1. Pending")
-            print("2. Completed")
+            print("2. Delivery")
+            print("3. Completed")
             while True:
-                status_choice = input("Select status (or Enter for all): ")
+                status_choice = input("Please enter your choice:   ")
 
                 status = ""
                 if status_choice == "1":
                     status = "Pending"
                     break
                 elif status_choice == "2":
+                    status = "Delivery"
+                    break
+                elif status_choice == "3":
                     status = "Completed"
                     break
                 else:
-                    input("\033[91mInvalid Method option. Please press Enter to try again.\033[0m")
+                    input("\033[91mInvalid Status option. Please press Enter to try again.\033[0m")
 
             if status:
                 filtered = [o for o in orders if o['DeliveryStatus'] == status]
@@ -1574,30 +1572,67 @@ def manage_order():
         elif choice == "4":
             clear_screen()
             display_orders(orders, "All Orders", show_footer=False, pause=False)
-            oid_str = input("Enter Order ID to mark as Completed: ").strip()
+            oid_str = input("Enter Order ID to update status: ").strip()
             if not oid_str.isdigit():
-                print("Invalid Order ID (must be a number).")
-                input("Press Enter to continue...")
+                input("\033[91mInvalid Order ID. Press Enter to continue...\033[0m")
                 continue
             oid = int(oid_str)
             if 1 <= oid <= len(orders):
-                orders[oid-1]['DeliveryStatus'] = "Completed"
-                save_orders(orders)
-                print(f"Order {oid} marked as Completed.")
+                current_status = orders[oid-1]['DeliveryStatus']
+                print(f"\nCurrent status: {current_status}")
+                print("\nSelect new status:")
+                print("1. Pending")
+                print("2. Delivery")
+                print("3. Completed")
+                print("0. Cancel")
+                
+                status_choice = input("\nEnter your choice: ").strip()
+                
+                if status_choice == "1":
+                    new_status = "Pending"
+                elif status_choice == "2":
+                    new_status = "Delivery"
+                elif status_choice == "3":
+                    new_status = "Completed"
+                elif status_choice == "0":
+                    print("\033[91mStatus update cancelled.\033[0m")
+                    input("Press Enter to continue...")
+                    continue
+                else:
+                    input("\033[91mInvalid choice. Press Enter to continue...\033[0m")
+                    continue
+                
+                # Validate status transition
+                valid_transitions = {
+                    "Pending": ["Delivery"],
+                    "Delivery": ["Completed"],
+                    "Completed": []
+                }
+                
+                if current_status in valid_transitions and new_status in valid_transitions[current_status]:
+                    orders[oid-1]['DeliveryStatus'] = new_status
+                    save_orders(orders)
+                    print(f"\033[96mOrder {oid} status updated to {new_status}.\033[0m")
+                else:
+                    print(f"\033[91mInvalid status transition from {current_status} to {new_status}.\033[0m")
+                    print("Allowed transitions:")
+                    print(f"- Pending → Delivery")
+                    print(f"- Delivery → Completed")
+                
             else:
-                print(f"No order found with Order ID {oid}.")
+                print(f"\033[91mNo order found with Order ID {oid}.\033[0m")
             input("Press Enter to continue...")
 
         elif choice == "0":
             break
         else:
-            print("Invalid option.")
-            input("Press Enter to continue...")
-
+            input("\033[91mInvalid option. Press Enter to continue...\033[0m")
 
 def parse_order_line(line, order_id):
     parts = line.strip().split('|')
-    if len(parts) == 9:
+    if len(parts) >= 8:  # Changed from 9 to 8 since we'll add status if missing
+        # If status is missing (old records), default to Pending
+        status = parts[8] if len(parts) >= 9 else "Pending"
         return {
             'CustomerID': parts[0],
             'Product': parts[1],
@@ -1607,30 +1642,29 @@ def parse_order_line(line, order_id):
             'DateTime': parts[5],
             'PaymentMethod': parts[6],
             'PaymentDetails': parts[7],
-            'DeliveryStatus': parts[8]
+            'DeliveryStatus': status
         }
     return None
-
 
 def save_orders(orders):
     try:
         with open("orderhistory.txt", "w") as file:
             for o in orders:
+                # Ensure all fields exist, defaulting empty ones
                 line = "|".join([
-                    o['CustomerID'],
-                    o['Product'],
-                    str(o['Quantity']),
-                    f"{o['Price']:.2f}",
-                    f"{o['Total']:.2f}",
-                    o['DateTime'],
-                    o['PaymentMethod'],
-                    o['PaymentDetails'],
-                    o['DeliveryStatus']
+                    o.get('CustomerID', ''),
+                    o.get('Product', ''),
+                    str(o.get('Quantity', 0)),
+                    f"{o.get('Price', 0):.2f}",
+                    f"{o.get('Total', 0):.2f}",
+                    o.get('DateTime', ''),
+                    o.get('PaymentMethod', ''),
+                    o.get('PaymentDetails', ''),
+                    o.get('DeliveryStatus', 'Pending')  # Default to Pending if missing
                 ])
                 file.write(line + "\n")
     except Exception as e:
         print(f"Error saving orders: {e}")
-
 
 def display_orders(orders, title="", show_footer=True, pause=True):
     headers = ["Order_ID", "CustomerID", "Product", "Qty", "Price", "Total", "DateTime", "Payment", "Details", "Status"]
@@ -1664,20 +1698,66 @@ def display_orders(orders, title="", show_footer=True, pause=True):
 
     print("-" * total_width)
     if show_footer:
-        print(f"Total Orders : {len(orders)}")
+        print(f"\033[93mTotal Orders : {len(orders)}\033[0m")
         total_amount = sum(o['Total'] for o in orders)
-        print(f"Total Revenue: RM {total_amount:.2f}")
+        print(f"\033[93mTotal Revenue: RM {total_amount:.2f}\033[0m")
     if pause:
         input("\nPress Enter to continue...")
 
 # show feedback
 def manage_feedback():
     clear_screen()
-    file = "feedback.txt"
-    data = load_data(file)
-    print("\n--- Feedback Entries ---")
-    for row in data:
-        print(" | ".join(row))
+    
+    # Load feedback data
+    feedback_data = load_data("feedback.txt")
+    
+    # Load user data to map IDs to usernames
+    users = {}
+    try:
+        with open("users_details.txt", 'r', encoding='utf-8') as f:
+            for line in f:
+                parts = line.strip().split('|')
+                if len(parts) >= 2:  # At least ID and username
+                    users[parts[0]] = parts[1]  # Map ID to username
+    except FileNotFoundError:
+        print("User data file not found.")
+        input("\nPress Enter to return...")
+        return
+
+    if not feedback_data:
+        print("No feedback entries found.")
+        input("\nPress Enter to return...")
+        return
+
+    # Prepare table data
+    table_data = []
+    for row in feedback_data:
+        if len(row) >= 3:  # Ensure we have ID, title, and feedback
+            user_id = row[0]
+            username = users.get(user_id, f"Unknown (ID: {user_id})")
+            title = row[1]
+            feedback = row[2]
+            table_data.append([username, title, feedback])
+
+    # Display table
+    print("================================ FEEDBACK ENTRIES ========================================")
+    print(f"{'Username':<20} | {'Type':<15} | {'Feedback':<50}")
+    print("="*90)
+    
+    for entry in table_data:
+        username, title, feedback = entry
+        # Split long feedback into multiple lines if needed
+        feedback_lines = [feedback[i:i+50] for i in range(0, len(feedback), 50)]
+        
+        # Print first line with username and title
+        print(f"{username[:19]:<20} | {title[:14]:<15} | {feedback_lines[0][:49]:<50}")
+        
+        # Print remaining feedback lines (if any) with empty username and title columns
+        for line in feedback_lines[1:]:
+            print(f"{'':<20} | {'':<15} | {line[:49]:<50}")
+        
+        print("-"*90)  # Separator between entries
+
     input("\nPress Enter to return...")
 # generate report
 def generate_daily_report(date_str):
@@ -1697,7 +1777,7 @@ def generate_daily_report(date_str):
         for o in filtered:
             print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
             total += o['total_price']
-        print(f"\n💰 Total Revenue: RM{total:.2f}")
+        print(f"\n\033[93mTotal Revenue: RM{total:.2f}\033[0m")
     except ValueError:
         print("❌ Invalid date format. Use YYYY-MM-DD.")
 
@@ -1720,7 +1800,7 @@ def generate_monthly_report(month_str):
         for o in filtered:
             print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
             total += o['total_price']
-        print(f"\n💰 Total Revenue: RM{total:.2f}")
+        print(f"\n\033[93mTotal Revenue: RM{total:.2f}\033[0m")
     except ValueError:
         print("❌ Invalid month format. Use YYYY-MM.")
 
@@ -1743,7 +1823,7 @@ def generate_annual_report(year_str):
         for o in filtered:
             print(f"{o['timestamp']:<20} | {o['product_name']:<35} | {o['quantity']:>5} | {o['total_price']:>10.2f}")
             total += o['total_price']
-        print(f"\n💰 Total Revenue: RM{total:.2f}")
+        print(f"\n\033[93mTotal Revenue: RM{total:.2f}\033[0m")
     except ValueError:
         print("❌ Invalid year format. Use YYYY.")
 
@@ -1752,20 +1832,21 @@ def generate_annual_report(year_str):
 def show_report_menu():
     while True:
         clear_screen()
-        print("\n--- Report Management ---")
+        print("========= Report Management =========")
+        print("=====================================")
         print("1. Daily Report")
         print("2. Monthly Report")
         print("3. Annual Report")
-        print("0. Back")
+        print("\n0. Go back main menu")
         choice = input("Select report type: ")
 
         if choice == "1":
             while True:
                 clear_screen()
-                print("\n--- Daily Report ---")
+                print("~~~~~ Daily Report ~~~~~")
                 print("1. Search by date")
                 print("2. Today's report")
-                print("0. Back")
+                print("\n0. Back")
                 sub_choice = input("Select option: ")
                 if sub_choice == "1":
                     date_str = input("Enter date (YYYY-MM-DD): ")
@@ -1783,10 +1864,10 @@ def show_report_menu():
         elif choice == "2":
             while True:
                 clear_screen()
-                print("\n--- Monthly Report ---")
+                print("~~~~~ Monthly Report ~~~~~")
                 print("1. Search by month")
                 print("2. This month's report")
-                print("0. Back")
+                print("\n0. Back")
                 sub_choice = input("Select option: ")
                 if sub_choice == "1":
                     month_str = input("Enter month (YYYY-MM): ")
@@ -1804,10 +1885,10 @@ def show_report_menu():
         elif choice == "3":
             while True:
                 clear_screen()
-                print("\n--- Annual Report ---")
+                print("~~~~~ Annual Report ~~~~~")
                 print("1. Search by year")
                 print("2. This year's report")
-                print("0. Back")
+                print("\n0. Back")
                 sub_choice = input("Select option: ")
                 if sub_choice == "1":
                     year_str = input("Enter year (YYYY): ")
@@ -1830,12 +1911,63 @@ def show_report_menu():
 # manage staff account
 def show_staff():
     clear_screen()
-    staff_list = load_admin_details("profile")  # 可用 profile/login/register 都行
-    print("ID | Name | Email | Address | Phone")
-    print("-" * 50)
-    for staff in staff_list:
-        print(f"{staff['id']} | {staff['fullname']} | {staff['email']} | {staff['address']} | {staff['phonenumber']}")
+    staff_list = load_admin_details("profile")
+    
+    if not staff_list:
+        print("No staff members found.")
+        input("\nPress Enter to return...")
+        return
 
+    # Define column widths
+    col_widths = {
+        'id': 4,
+        'fullname': 20,
+        'email': 25,
+        'address': 25,
+        'phonenumber': 15
+    }
+
+    # Create the header
+    headers = [
+        "ID".center(col_widths['id']),
+        "Name".center(col_widths['fullname']),
+        "Email".center(col_widths['email']),
+        "Address".center(col_widths['address']),
+        "Phone".center(col_widths['phonenumber'])
+    ]
+    
+    # Print table header
+    print("╔" + "═"*(col_widths['id']+2) + "╦" + 
+          "═"*(col_widths['fullname']+2) + "╦" + 
+          "═"*(col_widths['email']+2) + "╦" + 
+          "═"*(col_widths['address']+2) + "╦" + 
+          "═"*(col_widths['phonenumber']+2) + "╗")
+    
+    print("║ " + " ║ ".join(headers) + " ║")
+    
+    print("╠" + "═"*(col_widths['id']+2) + "╬" + 
+          "═"*(col_widths['fullname']+2) + "╬" + 
+          "═"*(col_widths['email']+2) + "╬" + 
+          "═"*(col_widths['address']+2) + "╬" + 
+          "═"*(col_widths['phonenumber']+2) + "╣")
+
+    # Print each staff member's information
+    for staff in staff_list:
+        id_col = str(staff['id']).center(col_widths['id'])
+        name_col = staff['fullname'][:col_widths['fullname']].ljust(col_widths['fullname'])
+        email_col = staff['email'][:col_widths['email']].ljust(col_widths['email'])
+        address_col = staff['address'][:col_widths['address']].ljust(col_widths['address'])
+        phone_col = staff['phonenumber'][:col_widths['phonenumber']].ljust(col_widths['phonenumber'])
+        
+        print(f"║ {id_col} ║ {name_col} ║ {email_col} ║ {address_col} ║ {phone_col} ║")
+    
+    # Print table footer
+    print("╚" + "═"*(col_widths['id']+2) + "╩" + 
+          "═"*(col_widths['fullname']+2) + "╩" + 
+          "═"*(col_widths['email']+2) + "╩" + 
+          "═"*(col_widths['address']+2) + "╩" + 
+          "═"*(col_widths['phonenumber']+2) + "╝")
+    
 def add_staff():
     clear_screen()
     staff_list = load_admin_details("register")
@@ -1854,7 +1986,7 @@ def add_staff():
     with open("staff.txt", "a", encoding="utf-8") as f:
         f.write(new_line + "\n")
 
-    print("Staff added successfully.")
+    print("\033[96mStaff added successfully.\033[0m")
     input("Press Enter to return...")
 
 def delete_staff():
@@ -1880,22 +2012,22 @@ def delete_staff():
             for staff in new_list:
                 line = f'{staff["id"]}|{staff["fullname"]}|{staff["email"]}|{staff["address"]}|{staff["phonenumber"]}|{staff["password"]}'
                 f.write(line + "\n")
-        print("Staff deleted successfully.")
+        print("\033[96mStaff deleted successfully.\033[0m")
     input("Press Enter to return...")
 
 def manage_staff_account():
     while True:
         clear_screen()
-        print("=== Manage Staff Account ===")
+        print("======== Manage Staff Account =======")
+        print("=====================================")
         print("1. Show staff")
         print("2. Add staff")
         print("3. Delete staff")
-        print("0. Return")
+        print("\n0. Go back main menu")
         choice = input("Enter choice: ")
 
         if choice == "1":
             show_staff()
-            input("\nPress Enter to return...")
         elif choice == "2":
             add_staff()
         elif choice == "3":
@@ -1903,7 +2035,7 @@ def manage_staff_account():
         elif choice == "0":
             break
         else:
-            input("Invalid choice. Press Enter to try again...")
+            input("\033[91mInvalid choice. Press Enter to try again...\033[0m")
 
 def show_profile(user_id):
     admin_details = load_admin_details("profile")
@@ -1948,7 +2080,7 @@ def edit_profile(user_id):
                     confirm_password = input("Confirm Password: ")
                     if new_password == confirm_password:
                         staff['password'] = hashlib.sha256(new_password.encode()).hexdigest()
-                        print("Password updated successfully.")
+                        print("\033[96mPassword updated successfully.\033[0m")
                     else:
                         print("Passwords do not match.")
                         input("Press Enter to continue...")
@@ -1966,7 +2098,7 @@ def edit_profile(user_id):
             for staff in admin_details:
                 line = f"{staff['id']}|{staff['fullname']}|{staff['email']}|{staff['address']}|{staff['phonenumber']}|{staff['password']}\n"
                 f.write(line)
-        print("\nProfile updated successfully.")
+        print("\n\033[96mProfile updated successfully.\033[0m")
     else:
         print("User not found.")
 
