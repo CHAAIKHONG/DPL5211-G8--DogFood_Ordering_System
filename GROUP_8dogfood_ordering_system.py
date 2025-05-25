@@ -1067,7 +1067,6 @@ def profile(user_id):
         if user_id == u['id']:
             user = u
             break
-            
     if user:
         while True:
             clear_screen()
@@ -1092,6 +1091,74 @@ def profile(user_id):
         print("User not found")
         input("Press Enter to continue...")
 
+def check_order_status():
+    global user_id
+    
+    def parse_order_line(line):
+        parts = line.strip().split('|')
+        if len(parts) >= 9:  # 确保有足够的部分
+            return {
+                'user_id': parts[0],
+                'product_name': parts[1],
+                'quantity': parts[2],
+                'unit_price': parts[3],
+                'total_price': parts[4],
+                'timestamp': parts[5],
+                'payment_method': parts[6],
+                'payment_details': parts[7],
+                'status': parts[8] if len(parts) >= 9 else 'Pending'  # 默认Pending
+            }
+        return None
+
+    # 直接读取orderhistory.txt文件
+    try:
+        with open('orderhistory.txt', 'r', encoding='utf-8') as f:
+            orders = [parse_order_line(line) for line in f if parse_order_line(line)]
+    except FileNotFoundError:
+        print("\033[91mOrder history file not found.\033[0m")
+        input("Press Enter to return to main menu...")
+        return
+
+    # 筛选当前用户的订单
+    user_orders = [order for order in orders if order['user_id'] == str(user_id)]
+    
+    if not user_orders:
+        print("\033[91mNo orders found for your account.\033[0m")
+        input("Press Enter to return to main menu...")
+        return
+
+    # 按状态分组
+    status_groups = {'Pending': [], 'Delivery': [], 'Completed': []}
+    for order in user_orders:
+        status = order['status']
+        if status in status_groups:
+            status_groups[status].append(order)
+        else:
+            status_groups['Pending'].append(order)  # 未知状态默认为Pending
+
+    clear_screen()
+    print("==================================================")
+    print("                YOUR ORDER STATUS                ")
+    print("==================================================")
+    
+    # 显示各状态订单
+    for status, orders in status_groups.items():
+        if not orders:
+            continue
+            
+        print(f"\n{status.upper()} ORDERS ({len(orders)})")
+        print("=" * 50)
+        print(f"{'Date':<12} {'Product':<25} {'Status':<12}")
+        print("-" * 50)
+        
+        for order in sorted(orders, key=lambda x: x['timestamp'], reverse=True):
+            date = order['timestamp'].split()[0]  # 只取日期部分
+            product = order['product_name'][:24] + '...' if len(order['product_name']) > 24 else order['product_name']
+            print(f"{date:<12} {product:<25} {order['status']:<12}")
+    
+    input("\nPress Enter to continue...")
+
+
 def menu():
     global user_id
     while True:
@@ -1102,38 +1169,37 @@ def menu():
         print("1. Product List")
         print("2. Shopping Cart")
         print("3. Purchase History")
-        print("4. FeedBack")
-        print("5. Profile")
+        print("4. Check Order Status")  # New option added here
+        print("5. FeedBack")
+        print("6. Profile")
         print("0. Logout")
 
-        menu_choose = int(input("\nEnter number of module you need to continue : "))
+        menu_choose = input("\nEnter number of module you need to continue : ")
+
+        try:
+            menu_choose = int(menu_choose)
+        except ValueError:
+            print("\033[91mInvalid input. Please enter a number.\033[0m")
+            input("\nPress Enter to return to the menu...")
+            continue
 
         match menu_choose:
             case 1:
-                # print("case 1")
                 category()
-                # break
             case 2:
-                # print("case 2")
                 shoppingcart()
-                # break
             case 3:
-                # print("case 3")
                 orderhistory()
-                # break
-            case 4:
-                # print("case 4")
-                feedback()
-                # break
+            case 4:  # New case for checking order status
+                check_order_status()
             case 5:
-                # print("case 5")
+                feedback()
+            case 6:
                 profile(user_id)
-                # break
             case 0:
-                print("case 0")
                 break
             case _:
-                print("\033[91mInvalid input. Please choose between 0-5.\033[0m")
+                print("\033[91mInvalid input. Please choose between 0-6.\033[0m")
                 input("\nPress Enter to return to the menu...")
                 
 
