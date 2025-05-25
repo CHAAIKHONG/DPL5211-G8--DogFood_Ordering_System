@@ -12,7 +12,6 @@ def clear_screen():
 def load_user_details(method, filename="users_details.txt"):
     user_details  = []
     global user_id
-    # print(f"id = {user_id}")
     if os.path.exists(filename):
         with open(filename, 'r', encoding='utf-8') as f:
             for index, line in enumerate(f):
@@ -150,7 +149,7 @@ def register():
     
     fullname = str(input("Enter username         : "))
     
-    users = load_user_details("register")  # 预加载一次现有用户
+    users = load_user_details("register")
     
     # Email validation loop + duplicate checking
     while True:
@@ -159,12 +158,11 @@ def register():
             print("\033[91mInvalid email. Please enter a valid email address (must contain '@' and '.').\033[0m\n")
             continue
         
-        # 检查 email 是否已存在
         email_exists = any(user['email'] == email for user in users)
         if email_exists:
             print("\033[91mThis email is already registered. Please use a different email.\033[0m\n")
         else:
-            break  # 通过格式和重复检查
+            break 
     
     address = str(input("Enter home address     : "))
     while True:
@@ -238,7 +236,6 @@ def login():
                 break
 
         if not found:
-            # Try staff.txt
             users = load_admin_details("login")
             if email == "manager@gmail.com" and password == "manager@123":
                 found = True
@@ -336,7 +333,6 @@ def add_to_cart(user_id, product, products, product_file):
     with open('user_shoppingcart.txt', 'a', encoding='utf-8') as f:
         f.write(f"{user_id}|{product['product_name']}|{quantity}|{product['price']}|{total_price:.2f}\n")
 
-    # 更新库存
     product['stock'] = str(int(product['stock']) - quantity)
     save_products(products, product_file)
     print("\033[96mProduct added to cart!\033[0m")
@@ -834,7 +830,6 @@ def view_profile(user):
     print(f"Phone number  : {user['phonenumber']}")
     input("\nPress Enter to return to main menu...")
 
-# 更新资料
 def update_profile(user, users):
     while True:
         clear_screen()
@@ -946,50 +941,6 @@ def update_profile(user, users):
             input("\033[91mInvalid choice. Press Enter to try again...\033[0m")
 
     save_users(users)
-    # input("Press Enter to return to menu...")
-
-# def category():
-#     product_file = "product.txt"
-#     categories = load_categories("category.txt")
-#     products = load_products(product_file)
-#     global user_id
-
-#     clear_screen()
-
-#     while True:
-#         clear_screen()
-#         show_categories(categories)
-        
-#         selected_category = input("\nEnter a category ID to view its products : ").strip()
-#         if selected_category == "0":
-#             clear_screen()
-#             break
-#         elif selected_category in categories:
-#             while True:
-#                 show_products_by_category(products, selected_category, categories[selected_category])
-#                 selected_product = input("\nEnter a product ID to see details (or 0 to go back): ").strip()
-#                 if selected_product == "0":
-#                     break
-#                 product = next((p for p in products if p['product_id'] == selected_product and p['category_id'] == selected_category), None)
-#                 if product:
-#                     while True:
-#                         show_product_detail(product)
-#                         choice = input("Choose an option: ").strip()
-#                         if choice == "0":
-#                             break
-#                         elif choice == "1":
-#                             if int(product['stock']) > 0:
-#                                 add_to_cart(user_id, product, products, product_file)
-#                             else:
-#                                 input("\033[91mThis product is out of stock. Cannot add to cart.\033[0m")
-#                             break
-#                         else:
-#                             input("\033[91mInvalid code. Please press Enter to try again.\033[0m")
-#                     break  # Exit product detail loop
-#                 else:
-#                     input("\033[91mInvalid product ID. Please press Enter to try again.\033[0m")
-#         else:
-#             input("\033[91mInvalid category ID. Please press Enter to try again.\033[0m")
 
 def shoppingcart():
     cart = load_cart()
@@ -2091,7 +2042,6 @@ def delete_staff():
     if len(new_list) == len(staff_list):
         print("Staff ID not found.")
     else:
-        # 重新写入文件
         with open("staff.txt", "w", encoding="utf-8") as f:
             for staff in new_list:
                 line = f'{staff["id"]}|{staff["fullname"]}|{staff["email"]}|{staff["address"]}|{staff["phonenumber"]}|{staff["password"]}'
@@ -2174,11 +2124,9 @@ def edit_profile(user_id):
                 else:
                     print("Invalid choice.")
                     input("Press Enter to continue...")
-
-            break  # done editing
+            break 
 
     if found:
-        # 保存更改到 staff.txt
         with open("staff.txt", "w", encoding="utf-8") as f:
             for staff in admin_details:
                 line = f"{staff['id']}|{staff['fullname']}|{staff['email']}|{staff['address']}|{staff['phonenumber']}|{staff['password']}\n"
@@ -2249,10 +2197,8 @@ while True:
 
     if first_choose == "1":
         login()
-        # break
     elif first_choose == "2":
         register()
-        # break
     elif first_choose == "0":
         exit()
     else:

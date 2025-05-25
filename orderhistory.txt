@@ -26,3 +26,4 @@
 5|Primal Raw Frozen Chicken Nuggets|10|35.0|350.0|2025-05-25 21:32:41|Cash on Delivery|N/A|Pending
 5|Stella & Chewy's Raw Patties|20|40.0|800.0|2025-05-25 21:33:18|Cash on Delivery|N/A|Pending
 5|Stella & Chewy's Raw Patties|2|40.0|80.0|2025-05-25 21:33:18|Cash on Delivery|N/A|Pending
+5|Pedigree Wet Food Chicken|5|2.3|11.5|2025-05-25 22:33:34|Cash on Delivery|N/A|Pending
