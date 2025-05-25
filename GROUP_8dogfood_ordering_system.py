@@ -703,10 +703,9 @@ def view_and_purchase(cart, user_id):
                 f.write("============================================================\n")
             
             # Save to order history
-            # In the view_and_purchase function, modify the part where orders are saved:
             with open("orderhistory.txt", 'a', encoding='utf-8') as f:
                 for item in selected_items:
-                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{formatted_datetime}|{payment_method}|{payment_details}|Pending\n")
+                    f.write(f"{item['user_id']}|{item['product_name']}|{item['quantity']}|{item['unit_price']}|{item['total_price']}|{formatted_datetime}|{payment_method}|{payment_details}\n")
             
             # Display receipt to user
             clear_screen()
@@ -1027,7 +1026,7 @@ def show_feedback_menu():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")    
     print("1. Product")
     print("2. Staff")
-    print("\n0. Go back main menu")
+    print("\0. Go back main menu")
 
 def feedback():
     global user_id
@@ -1060,8 +1059,9 @@ def feedback():
 def profile(user_id):
     users = load_user_details("profile")  # This loads all users
     user = None
-    print(user_id)    
-
+    print(user_id)
+    print(f"userid = { u['id']}")
+    
     # Find the current user
     for u in users:
         if user_id == u['id']:
@@ -1094,44 +1094,32 @@ def profile(user_id):
 def check_order_status():
     global user_id
     
-    # Load order history data
-    def load_order_history(filename="orderhistory.txt"):
-        history = []
-        if os.path.exists(filename):
-            with open(filename, 'r', encoding='utf-8') as f:
-                for line_num, line in enumerate(f, start=1):
-                    parts = line.strip().split('|')
-                    if len(parts) < 6:
-                        print(f"[❌ Line {line_num}] Skipped - Expected at least 6 parts but got {len(parts)}: {line.strip()}")
-                        continue
-                    try:
-                        # Extract base fields
-                        user_id, product_name, quantity, unit_price, total_price, timestamp = parts[:6]
-                        
-                        # Extract payment info if available
-                        payment_method = parts[6] if len(parts) > 6 else "Unknown"
-                        payment_details = parts[7] if len(parts) > 7 else "N/A"
-                        status = parts[8] if len(parts) > 8 else "Pending"
-                        
-                        history.append({
-                            'user_id': user_id.strip(),
-                            'product_name': product_name.strip(),
-                            'quantity': int(quantity),
-                            'unit_price': float(unit_price),
-                            'total_price': float(total_price),
-                            'timestamp': timestamp.strip(),
-                            'payment_method': payment_method.strip(),
-                            'payment_details': payment_details.strip(),
-                            'status': status.strip()
-                        })
-                    except ValueError as e:
-                        print(f"[❌ Line {line_num}] Error converting values: {e}")
-        return history
+    def parse_order_line(line):
+        parts = line.strip().split('|')
+        if len(parts) >= 9:  # 确保有足够的部分
+            return {
+                'user_id': parts[0],
+                'product_name': parts[1],
+                'quantity': parts[2],
+                'unit_price': parts[3],
+                'total_price': parts[4],
+                'timestamp': parts[5],
+                'payment_method': parts[6],
+                'payment_details': parts[7],
+                'status': parts[8] if len(parts) >= 9 else 'Pending'  # 默认Pending
+            }
+        return None
 
-    # Load the orders
-    orders = load_order_history()
-    
-    # Filter orders for current user
+    # 直接读取orderhistory.txt文件
+    try:
+        with open('orderhistory.txt', 'r', encoding='utf-8') as f:
+            orders = [parse_order_line(line) for line in f if parse_order_line(line)]
+    except FileNotFoundError:
+        print("\033[91mOrder history file not found.\033[0m")
+        input("Press Enter to return to main menu...")
+        return
+
+    # 筛选当前用户的订单
     user_orders = [order for order in orders if order['user_id'] == str(user_id)]
     
     if not user_orders:
@@ -1139,21 +1127,21 @@ def check_order_status():
         input("Press Enter to return to main menu...")
         return
 
-    # Group by status
+    # 按状态分组
     status_groups = {'Pending': [], 'Delivery': [], 'Completed': []}
     for order in user_orders:
         status = order['status']
         if status in status_groups:
             status_groups[status].append(order)
         else:
-            status_groups['Pending'].append(order)  # Default to Pending for unknown statuses
+            status_groups['Pending'].append(order)  # 未知状态默认为Pending
 
     clear_screen()
     print("==================================================")
     print("                YOUR ORDER STATUS                ")
     print("==================================================")
     
-    # Display orders by status
+    # 显示各状态订单
     for status, orders in status_groups.items():
         if not orders:
             continue
@@ -1164,7 +1152,7 @@ def check_order_status():
         print("-" * 50)
         
         for order in sorted(orders, key=lambda x: x['timestamp'], reverse=True):
-            date = order['timestamp'].split()[0]  # Just the date part
+            date = order['timestamp'].split()[0]  # 只取日期部分
             product = order['product_name'][:24] + '...' if len(order['product_name']) > 24 else order['product_name']
             print(f"{date:<12} {product:<25} {order['status']:<12}")
     
@@ -1728,16 +1716,17 @@ def save_orders(orders):
     try:
         with open("orderhistory.txt", "w") as file:
             for o in orders:
+                # Ensure all fields exist, defaulting empty ones
                 line = "|".join([
-                    o.get('user_id', ''),
-                    o.get('product_name', ''),
-                    str(o.get('quantity', 0)),
-                    f"{o.get('unit_price', 0):.2f}",
-                    f"{o.get('total_price', 0):.2f}",
-                    o.get('timestamp', ''),
-                    o.get('payment_method', ''),
-                    o.get('payment_details', ''),
-                    o.get('status', 'Pending')  # Always include status, default to Pending
+                    o.get('CustomerID', ''),
+                    o.get('Product', ''),
+                    str(o.get('Quantity', 0)),
+                    f"{o.get('Price', 0):.2f}",
+                    f"{o.get('Total', 0):.2f}",
+                    o.get('DateTime', ''),
+                    o.get('PaymentMethod', ''),
+                    o.get('PaymentDetails', ''),
+                    o.get('DeliveryStatus', 'Pending')  # Default to Pending if missing
                 ])
                 file.write(line + "\n")
     except Exception as e:
@@ -1761,22 +1750,22 @@ def display_orders(orders, title="", show_footer=True, pause=True):
     for idx, o in enumerate(orders, start=1):
         row = [
             idx,
-            o['user_id'],
-            o['product_name'],
-            o['quantity'],
-            f"{o['unit_price']:.2f}",
-            f"{o['total_price']:.2f}",
-            o['timestamp'],
-            o['payment_method'],
-            o['payment_details'],
-            o['status']
+            o['CustomerID'],
+            o['Product'],
+            o['Quantity'],
+            f"{o['Price']:.2f}",
+            f"{o['Total']:.2f}",
+            o['DateTime'],
+            o['PaymentMethod'],
+            o['PaymentDetails'],
+            o['DeliveryStatus']
         ]
         print(format_row(row))
 
     print("-" * total_width)
     if show_footer:
         print(f"\033[93mTotal Orders : {len(orders)}\033[0m")
-        total_amount = sum(float(o['total_price']) for o in orders)
+        total_amount = sum(o['Total'] for o in orders)
         print(f"\033[93mTotal Revenue: RM {total_amount:.2f}\033[0m")
     if pause:
         input("\nPress Enter to continue...")
@@ -1906,7 +1895,7 @@ def generate_annual_report(year_str):
 
     input("\nPress Enter to return...")
 
-def show_report_menu(role):
+def show_report_menu():
     while True:
         clear_screen()
         print("========= Report Management =========")
@@ -1981,10 +1970,7 @@ def show_report_menu(role):
                     input("\033[91mInvalid Annual Report option. Please press Enter to try again.\033[0m")
 
         elif choice == "0":
-            if role == "superadmin":
-                admin_dashboard("superadmin")
-            else:
-                admin_dashboard("admin")
+            admin_dashboard("superadmin")
             break
         else:
             input("\033[91mInvalid Report Type or option. Please press Enter to try again.\033[0m")
@@ -2108,7 +2094,6 @@ def manage_staff_account():
 
         if choice == "1":
             show_staff()
-            input("\nPress Enter to return...")
         elif choice == "2":
             add_staff()
         elif choice == "3":
@@ -2183,7 +2168,7 @@ def edit_profile(user_id):
     else:
         print("User not found.")
 
-def admin_profile(user_id):
+def profile(user_id):
     while True:
         clear_screen()
         print("=== Profile Menu ===")
@@ -2221,10 +2206,10 @@ def admin_dashboard(role):
         elif choice == "4":
             manage_feedback()
         elif choice == "5":
-            show_report_menu(role)
+            show_report_menu()
         elif choice == "6":
             if role == "admin":
-                admin_profile(user_id)
+                profile(user_id)
             else:
                 manage_staff_account()
         elif choice == "0":

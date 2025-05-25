@@ -1,5 +1,1 @@
 2|Orijen Original Dry Dog Food|1|55.0|55.0
-5|Homemade Chicken & Rice Bowl|12|15.0|180.0
-5|Stella & Chewy's Raw Patties|20|40.0|800.0
-5|Stella & Chewy's Raw Patties|2|40.00|80.00
-5|Primal Raw Frozen Chicken Nuggets|10|35.00|350.00

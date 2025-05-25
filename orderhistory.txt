@@ -21,3 +21,8 @@
 1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-25 12:03:04|Cash on Delivery|N/A|Pending
 5|Orijen Original Dry Dog Food|2|55.0|110.0|2025-05-25 20:55:28|Cash on Delivery|N/A|Pending
 5|Orijen Original Dry Dog Food|1|55.0|55.0|2025-05-25 21:01:20|Cash on Delivery|N/A|Delivery
+5|Primal Raw Frozen Chicken Nuggets|20|35.0|700.0|2025-05-25 21:31:31|Visa|Card: ****-****-****-1987, Exp: 05/26|Pending
+5|Homemade Chicken & Rice Bowl|12|15.0|180.0|2025-05-25 21:32:41|Cash on Delivery|N/A|Pending
+5|Primal Raw Frozen Chicken Nuggets|10|35.0|350.0|2025-05-25 21:32:41|Cash on Delivery|N/A|Pending
+5|Stella & Chewy's Raw Patties|20|40.0|800.0|2025-05-25 21:33:18|Cash on Delivery|N/A|Pending
+5|Stella & Chewy's Raw Patties|2|40.0|80.0|2025-05-25 21:33:18|Cash on Delivery|N/A|Pending

@@ -2,9 +2,9 @@
 2|1|Orijen Original Dry Dog Food|55.00|0|Premium dry dog food with fresh ingredients,active
 3|2|Cesar Wet Dog Food Beef|2.50|55|Delicious wet food with real beef,active
 4|2|Pedigree Wet Food Chicken|2.30|88|Tasty wet food with chicken flavor,active
-5|3|Primal Raw Frozen Chicken Nuggets|35.00|57|Raw frozen chicken nuggets for dogs,active
+5|3|Primal Raw Frozen Chicken Nuggets|35.00|37|Raw frozen chicken nuggets for dogs,active
 6|3|Stella & Chewy's Raw Patties|40.00|33|Raw frozen patties rich in nutrients,active
-7|4|Instinct Freeze-Dried Raw Meals|50.00|30|Freeze-dried raw meals for dogs,active
+7|4|Instinct Freeze-Dried Raw Meals|50.00|10|Freeze-dried raw meals for dogs,active
 8|4|Open Farm Freeze-Dried Raw|48.99|29|Natural freeze-dried raw dog food,active
 9|5|Homemade Chicken & Rice Bowl|15.00|17|Homemade style chicken and rice,active
 10|2|Beef & Sweet Potato Stew|16.00|86|Hearty beef stew with sweet potato,active
