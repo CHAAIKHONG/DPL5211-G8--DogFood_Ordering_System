@@ -17,5 +17,7 @@
 1|Homemade Chicken & Rice Bowl|4|15.00|60.00|2025-05-23 15:43:28|Cash on Delivery|N/A|Delivery
 1|Orijen Original Dry Dog Food|4|55.00|220.00|2025-05-23 15:50:03|Cash on Delivery|N/A|Delivery
 1|Open Farm Freeze-Dried Raw|1|48.99|48.99|2025-05-23 15:50:03|Cash on Delivery|N/A|Pending
-1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-24 17:37:43|Cash on Delivery|N/A|Pending
+1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-24 17:37:43|Cash on Delivery|N/A|Delivery
 1|Beef & Sweet Potato Stew|6|16.00|96.00|2025-05-25 12:03:04|Cash on Delivery|N/A|Pending
+5|Orijen Original Dry Dog Food|2|55.0|110.0|2025-05-25 20:55:28|Cash on Delivery|N/A|Pending
+5|Orijen Original Dry Dog Food|1|55.0|55.0|2025-05-25 21:01:20|Cash on Delivery|N/A|Delivery
