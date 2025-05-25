@@ -1026,7 +1026,7 @@ def show_feedback_menu():
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")    
     print("1. Product")
     print("2. Staff")
-    print("\0. Go back main menu")
+    print("\n0. Go back main menu")
 
 def feedback():
     global user_id
@@ -1059,9 +1059,8 @@ def feedback():
 def profile(user_id):
     users = load_user_details("profile")  # This loads all users
     user = None
-    print(user_id)
-    print(f"userid = { u['id']}")
-    
+    print(user_id)    
+
     # Find the current user
     for u in users:
         if user_id == u['id']:
@@ -2094,6 +2093,7 @@ def manage_staff_account():
 
         if choice == "1":
             show_staff()
+            input("\nPress Enter to return...")
         elif choice == "2":
             add_staff()
         elif choice == "3":
@@ -2168,7 +2168,7 @@ def edit_profile(user_id):
     else:
         print("User not found.")
 
-def profile(user_id):
+def admin_profile(user_id):
     while True:
         clear_screen()
         print("=== Profile Menu ===")
@@ -2209,7 +2209,7 @@ def admin_dashboard(role):
             show_report_menu()
         elif choice == "6":
             if role == "admin":
-                profile(user_id)
+                admin_profile(user_id)
             else:
                 manage_staff_account()
         elif choice == "0":
