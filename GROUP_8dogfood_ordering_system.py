@@ -1716,22 +1716,22 @@ def display_orders(orders, title="", show_footer=True, pause=True):
     for idx, o in enumerate(orders, start=1):
         row = [
             idx,
-            o['user_id'],
-            o['product_name'],
-            o['quantity'],
-            f"{o['unit_price']:.2f}",
-            f"{o['total_price']:.2f}",
-            o['timestamp'],
-            o['payment_method'],
-            o['payment_details'],
-            o['status']
+            o['CustomerID'],
+            o['Product'],
+            o['Quantity'],
+            f"{o['Price']:.2f}",
+            f"{o['Total']:.2f}",
+            o['DateTime'],
+            o['PaymentMethod'],
+            o['PaymentDetails'],
+            o['DeliveryStatus']
         ]
         print(format_row(row))
 
     print("-" * total_width)
     if show_footer:
         print(f"\033[93mTotal Orders : {len(orders)}\033[0m")
-        total_amount = sum(float(o['total_price']) for o in orders)
+        total_amount = sum(float(o['Total']) for o in orders)
         print(f"\033[93mTotal Revenue: RM {total_amount:.2f}\033[0m")
     if pause:
         input("\nPress Enter to continue...")
