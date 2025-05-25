@@ -1071,7 +1071,7 @@ def profile(user_id):
         while True:
             clear_screen()
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            print("                          Menu                          ")
+            print("                          Profile                       ")
             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
             print("1. View Profile")
             print("2. Update Profile")
