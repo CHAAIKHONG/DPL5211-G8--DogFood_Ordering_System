@@ -1894,7 +1894,7 @@ def generate_annual_report(year_str):
 
     input("\nPress Enter to return...")
 
-def show_report_menu():
+def show_report_menu(role):
     while True:
         clear_screen()
         print("========= Report Management =========")
@@ -1969,7 +1969,10 @@ def show_report_menu():
                     input("\033[91mInvalid Annual Report option. Please press Enter to try again.\033[0m")
 
         elif choice == "0":
-            admin_dashboard("superadmin")
+            if role == "superadmin":
+                admin_dashboard("superadmin")
+            else:
+                admin_dashboard("admin")
             break
         else:
             input("\033[91mInvalid Report Type or option. Please press Enter to try again.\033[0m")
@@ -2206,7 +2209,7 @@ def admin_dashboard(role):
         elif choice == "4":
             manage_feedback()
         elif choice == "5":
-            show_report_menu()
+            show_report_menu(role)
         elif choice == "6":
             if role == "admin":
                 admin_profile(user_id)
